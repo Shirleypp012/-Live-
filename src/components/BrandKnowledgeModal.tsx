@@ -1,149 +1,610 @@
-import React from 'react';
-import { BUV_BRAND_INFO } from '../data/presets';
-import { X, ShieldCheck, Award, Sparkles, CheckCircle2, AlertTriangle, Layers } from 'lucide-react';
+import React, { useState } from 'react';
+import { ProductItem, SellingPointsAiModel } from '../types';
+import { PRODUCT_TEMPLATES, INITIAL_PRODUCTS } from '../data/presets';
+import {
+  X,
+  ShieldCheck,
+  Award,
+  Sparkles,
+  CheckCircle2,
+  AlertTriangle,
+  Layers,
+  Plus,
+  Trash2,
+  Check,
+  RotateCcw,
+  Package,
+  Cpu,
+  Zap,
+} from 'lucide-react';
 
 interface BrandKnowledgeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  products: ProductItem[];
+  activeProductId: string;
+  onSelectActiveProduct: (productId: string) => void;
+  onUpdateProducts: (products: ProductItem[]) => void;
 }
 
-export const BrandKnowledgeModal: React.FC<BrandKnowledgeModalProps> = ({ isOpen, onClose }) => {
+export const BrandKnowledgeModal: React.FC<BrandKnowledgeModalProps> = ({
+  isOpen,
+  onClose,
+  products,
+  activeProductId,
+  onSelectActiveProduct,
+  onUpdateProducts,
+}) => {
+  const [selectedProductId, setSelectedProductId] = useState<string>(activeProductId);
+  const [selectedAiModel, setSelectedAiModel] = useState<SellingPointsAiModel>('deepseek-v3');
+  const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
+  const [showTemplateMenu, setShowTemplateMenu] = useState<boolean>(false);
+
   if (!isOpen) return null;
 
+  const currentProduct = products.find((p) => p.id === selectedProductId) || products[0] || INITIAL_PRODUCTS[0];
+  const isActive = currentProduct.id === activeProductId;
+
+  const handleFieldChange = (fieldPath: string, value: any) => {
+    const updatedProducts = products.map((p) => {
+      if (p.id !== currentProduct.id) return p;
+
+      if (fieldPath.startsWith('model343.')) {
+        const subField = fieldPath.split('.')[1];
+        return {
+          ...p,
+          model343: { ...p.model343, [subField]: value },
+          updatedAt: new Date().toISOString().split('T')[0],
+        };
+      }
+      if (fieldPath.startsWith('sgsData.')) {
+        const subField = fieldPath.split('.')[1];
+        return {
+          ...p,
+          sgsData: { ...p.sgsData, [subField]: value },
+          updatedAt: new Date().toISOString().split('T')[0],
+        };
+      }
+      if (fieldPath === 'prohibitedWords') {
+        const words = typeof value === 'string' ? value.split(/[,，\n]/).map((w) => w.trim()).filter(Boolean) : value;
+        return { ...p, prohibitedWords: words, updatedAt: new Date().toISOString().split('T')[0] };
+      }
+      return { ...p, [fieldPath]: value, updatedAt: new Date().toISOString().split('T')[0] };
+    });
+
+    onUpdateProducts(updatedProducts);
+  };
+
+  const handleAddNewProductFromTemplate = (template: Partial<ProductItem>) => {
+    const newId = 'prod_custom_' + Date.now();
+    const newProduct: ProductItem = {
+      id: newId,
+      name: template.name?.replace('模板', '') || '自定义产品',
+      category: template.category || '护肤美妆',
+      positioning: template.positioning || '高效功效 · 专研成分',
+      price: template.price || '99元',
+      salesRecord: template.salesRecord || '爆款推荐 / 高好评率',
+      coverImage: template.coverImage || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+      model343: template.model343 || {
+        clays: '核心成分 1',
+        extracts: '植萃成分 2',
+        surfactants: '温和配方 3',
+      },
+      sgsData: template.sgsData || {
+        oil8h: '即刻改善 +50%',
+        oil14d: '14天实测提升 +30%',
+        blackhead14d: '28天指标改善 +25%',
+      },
+      prohibitedWords: template.prohibitedWords || ['绝对第一', '百分百根治'],
+      targetAudience: template.targetAudience || '注重品质与性价比的年轻消费群体',
+      customSellingPoints: template.customSellingPoints || '请输入产品核心特色...',
+      updatedAt: new Date().toISOString().split('T')[0],
+    };
+
+    const nextProducts = [...products, newProduct];
+    onUpdateProducts(nextProducts);
+    setSelectedProductId(newId);
+    setShowTemplateMenu(false);
+  };
+
+  const handleDeleteProduct = (productId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (products.length <= 1) {
+      alert('卖点库至少保留 1 个产品，无法删除！');
+      return;
+    }
+    const filtered = products.filter((p) => p.id !== productId);
+    onUpdateProducts(filtered);
+    if (selectedProductId === productId) {
+      setSelectedProductId(filtered[0].id);
+    }
+    if (activeProductId === productId) {
+      onSelectActiveProduct(filtered[0].id);
+    }
+  };
+
+  const handleResetDefaults = () => {
+    if (confirm('确认重置卖点库为初始品牌产品预设吗？')) {
+      onUpdateProducts(INITIAL_PRODUCTS);
+      setSelectedProductId(INITIAL_PRODUCTS[0].id);
+      onSelectActiveProduct(INITIAL_PRODUCTS[0].id);
+    }
+  };
+
+  const handleOptimizeWithAi = async () => {
+    setIsOptimizing(true);
+    try {
+      const res = await fetch('/api/selling-points/optimize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product: currentProduct,
+          aiModel: selectedAiModel,
+        }),
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        const opt = json.data;
+        const updated = products.map((p) => {
+          if (p.id !== currentProduct.id) return p;
+          return {
+            ...p,
+            name: opt.name || p.name,
+            positioning: opt.positioning || p.positioning,
+            price: opt.price || p.price,
+            salesRecord: opt.salesRecord || p.salesRecord,
+            model343: opt.model343 || p.model343,
+            sgsData: opt.sgsData || p.sgsData,
+            prohibitedWords: opt.prohibitedWords || p.prohibitedWords,
+            targetAudience: opt.targetAudience || p.targetAudience,
+            customSellingPoints: opt.customSellingPoints || p.customSellingPoints,
+            updatedAt: new Date().toISOString().split('T')[0],
+          };
+        });
+        onUpdateProducts(updated);
+      }
+    } catch (err) {
+      console.error('AI Selling points optimization failed:', err);
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-slate-900/60 backdrop-blur-md animate-fade-in overflow-y-auto">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+        {/* Header Bar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/80 gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-100">
-                {BUV_BRAND_INFO.name} · 爆款知识库与卖点地图
-              </h3>
-              <p className="text-xs text-slate-400">
-                {BUV_BRAND_INFO.positioning}
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900">
+                  卖点库与品牌知识中心
+                </h3>
+                <span className="px-2 py-0.5 rounded text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
+                  用户可编辑 & AI 引擎驱动
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
+                可陈列不同产品、多模型AI润色，全自动绑定到 Step 1-5 流水线生成
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          <div className="flex items-center gap-3">
+            {/* AI Model Switcher */}
+            <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl shadow-sm">
+              <Cpu className="w-4 h-4 text-emerald-600" />
+              <span className="text-xs text-slate-500 font-medium">优化模型:</span>
+              <select
+                value={selectedAiModel}
+                onChange={(e) => setSelectedAiModel(e.target.value as SellingPointsAiModel)}
+                className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer"
+              >
+                <option value="deepseek-v3">DeepSeek V3 (建议)</option>
+                <option value="deepseek-r1">DeepSeek R1 (思维链)</option>
+                <option value="gpt-4o">GPT-4o (OpenAI)</option>
+                <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+              </select>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-6 text-slate-300 text-sm">
-          {/* Sales & Authority Proof */}
-          <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-slate-900 border border-emerald-500/30">
-            <div className="flex items-center gap-2 mb-2 text-emerald-300 font-bold text-xs uppercase tracking-wider">
-              <Award className="w-4 h-4 text-emerald-400" />
-              <span>权威背书 & 销量纪录</span>
-            </div>
-            <p className="text-sm font-semibold text-emerald-200 leading-relaxed">
-              {BUV_BRAND_INFO.salesRecord}
-            </p>
-          </div>
-
-          {/* 3:4:3 Model Breakdown */}
-          <div>
-            <div className="flex items-center gap-2 mb-3 text-slate-100 font-bold text-sm">
-              <Layers className="w-4 h-4 text-emerald-400" />
-              <span>【3:4:3】清爽控油模型（核心技术架构）</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                <div className="text-xs font-bold text-emerald-400 mb-1">
-                  3 重天然泥（清洁吸附）
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  {BUV_BRAND_INFO.model343.clays}
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                <div className="text-xs font-bold text-teal-400 mb-1">
-                  4 重控油植萃（收敛水油）
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  {BUV_BRAND_INFO.model343.extracts}
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                <div className="text-xs font-bold text-cyan-400 mb-1">
-                  3 重清洁表活（温和泡润）
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  {BUV_BRAND_INFO.model343.surfactants}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* SGS Lab Proof Data */}
-          <div>
-            <div className="flex items-center gap-2 mb-3 text-slate-100 font-bold text-sm">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>SGS 权威人体功效实测数据</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-4 rounded-xl bg-slate-800/80 border border-emerald-500/20 text-center">
-                <div className="text-xl font-extrabold text-emerald-400 font-mono">
-                  {BUV_BRAND_INFO.sgsData.oil8h}
-                </div>
-                <div className="text-xs text-slate-400 mt-1">即刻 & 8小时持久控油</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-800/80 border border-emerald-500/20 text-center">
-                <div className="text-xl font-extrabold text-teal-400 font-mono">
-                  {BUV_BRAND_INFO.sgsData.oil14d}
-                </div>
-                <div className="text-xs text-slate-400 mt-1">14天改善面部出油</div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-800/80 border border-emerald-500/20 text-center">
-                <div className="text-xl font-extrabold text-cyan-400 font-mono">
-                  {BUV_BRAND_INFO.sgsData.blackhead14d}
-                </div>
-                <div className="text-xs text-slate-400 mt-1">14天黑头面积减少</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Compliance & Negative Case Rules */}
-          <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-500/30">
-            <div className="flex items-center gap-2 mb-2 text-rose-300 font-bold text-xs uppercase tracking-wider">
-              <AlertTriangle className="w-4 h-4 text-rose-400" />
-              <span>合规禁忌词与负面反例（文案严禁使用）</span>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {BUV_BRAND_INFO.prohibitedWords.map((word, idx) => (
-                <span
-                  key={idx}
-                  className="px-2.5 py-1 text-xs rounded-md bg-rose-500/10 text-rose-300 border border-rose-500/20"
-                >
-                  ✕ {word}
+        {/* Content Area: Left Sidebar (Products) + Right Form (Editable Details) */}
+        <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[500px]">
+          {/* Left Column: Products List & Templates */}
+          <div className="lg:col-span-4 border-r border-slate-200 bg-slate-50/50 p-4 flex flex-col justify-between overflow-y-auto">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Package className="w-4 h-4 text-emerald-600" />
+                  <span>陈列产品 ({products.length})</span>
                 </span>
-              ))}
+
+                <div className="relative">
+                  <button
+                    onClick={() => setShowTemplateMenu(!showTemplateMenu)}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 border border-emerald-500/30 text-xs font-bold transition-all flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>新增产品</span>
+                  </button>
+
+                  {/* Template Dropdown */}
+                  {showTemplateMenu && (
+                    <div className="absolute right-0 top-8 z-30 w-56 bg-white border border-slate-200 rounded-xl shadow-xl p-2 space-y-1 animate-scale-in">
+                      <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase">
+                        从预设模板创建
+                      </div>
+                      {PRODUCT_TEMPLATES.map((tmpl, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleAddNewProductFromTemplate(tmpl)}
+                          className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-700 hover:bg-slate-100 transition-colors flex items-center justify-between"
+                        >
+                          <span className="font-medium truncate">{tmpl.name}</span>
+                          <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                            {tmpl.category}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Product Cards */}
+              <div className="space-y-2.5">
+                {products.map((prod) => {
+                  const isSelected = prod.id === selectedProductId;
+                  const isCurrentActive = prod.id === activeProductId;
+
+                  return (
+                    <div
+                      key={prod.id}
+                      onClick={() => setSelectedProductId(prod.id)}
+                      className={`p-3 rounded-xl border transition-all cursor-pointer relative group ${
+                        isSelected
+                          ? 'bg-emerald-50/80 border-emerald-400 shadow-sm'
+                          : 'bg-white border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="font-bold text-sm text-slate-900 truncate">
+                              {prod.name}
+                            </span>
+                            {isCurrentActive && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white flex items-center gap-0.5 shadow-sm shrink-0">
+                                <Check className="w-3 h-3" />
+                                生效中
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 truncate">
+                            {prod.positioning}
+                          </p>
+                          <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-500">
+                            <span className="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200">
+                              {prod.category}
+                            </span>
+                            <span className="text-emerald-700 font-semibold">{prod.price}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={(e) => handleDeleteProduct(prod.id, e)}
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                          title="删除该产品"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="pt-4 border-t border-slate-200 mt-4 space-y-2">
+              <button
+                onClick={handleResetDefaults}
+                className="w-full px-3 py-1.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-slate-600 text-xs transition-colors flex items-center justify-center gap-1.5"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>恢复默认卖点预设</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column: Editable Product Details */}
+          <div className="lg:col-span-8 p-6 overflow-y-auto space-y-6 bg-white">
+            {/* Top Product Banner & Active Toggle */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    {currentProduct.category}
+                  </span>
+                  <h4 className="text-base font-bold text-slate-900">
+                    {currentProduct.name}
+                  </h4>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  上次更新时间: {currentProduct.updatedAt || '实时更新'}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {!isActive ? (
+                  <button
+                    onClick={() => onSelectActiveProduct(currentProduct.id)}
+                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5 active:scale-95"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>设为当前流水线生效产品</span>
+                  </button>
+                ) : (
+                  <span className="px-3 py-1.5 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold flex items-center gap-1.5">
+                    <Check className="w-4 h-4 text-emerald-600" />
+                    已绑定当前流水线
+                  </span>
+                )}
+
+                {/* AI Optimize Button */}
+                <button
+                  onClick={handleOptimizeWithAi}
+                  disabled={isOptimizing}
+                  className="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold shadow-md shadow-teal-600/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  title={`使用 ${selectedAiModel} 提炼规范 selling points`}
+                >
+                  {isOptimizing ? (
+                    <>
+                      <Sparkles className="w-4 h-4 animate-spin text-teal-100" />
+                      <span>{selectedAiModel.toUpperCase()} 优化中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 fill-amber-300 text-amber-300" />
+                      <span>AI 润色与提炼卖点</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Editable Fields Form */}
+            <div className="space-y-5">
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                    商品名称 (Product Name)
+                  </label>
+                  <input
+                    type="text"
+                    value={currentProduct.name}
+                    onChange={(e) => handleFieldChange('name', e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                    品类/分类 (Category)
+                  </label>
+                  <input
+                    type="text"
+                    value={currentProduct.category}
+                    onChange={(e) => handleFieldChange('category', e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                    品牌定位与核心标语 (Positioning)
+                  </label>
+                  <input
+                    type="text"
+                    value={currentProduct.positioning}
+                    onChange={(e) => handleFieldChange('positioning', e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                    售价表达 (Price)
+                  </label>
+                  <input
+                    type="text"
+                    value={currentProduct.price}
+                    onChange={(e) => handleFieldChange('price', e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Sales Record & Authority */}
+              <div>
+                <label className="text-xs font-bold text-emerald-700 flex items-center gap-1.5 mb-1.5">
+                  <Award className="w-4 h-4 text-emerald-600" />
+                  <span>权威背书 & 销量纪录 (Sales & Authority)</span>
+                </label>
+                <input
+                  type="text"
+                  value={currentProduct.salesRecord}
+                  onChange={(e) => handleFieldChange('salesRecord', e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-emerald-800 text-xs font-semibold focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              {/* 3:4:3 / Core Formula Model */}
+              <div>
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5 mb-2">
+                  <Layers className="w-4 h-4 text-emerald-600" />
+                  <span>核心技术与配方模型 (3:4:3 / Ingredient Matrix)</span>
+                </label>
+
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                    <span className="text-[11px] font-bold text-emerald-700">
+                      模块 1: 核心吸附/主体功效成分
+                    </span>
+                    <input
+                      type="text"
+                      value={currentProduct.model343.clays}
+                      onChange={(e) => handleFieldChange('model343.clays', e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                    <span className="text-[11px] font-bold text-teal-700">
+                      模块 2: 控油舒缓/植萃复配群
+                    </span>
+                    <input
+                      type="text"
+                      value={currentProduct.model343.extracts}
+                      onChange={(e) => handleFieldChange('model343.extracts', e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                    <span className="text-[11px] font-bold text-sky-700">
+                      模块 3: 清洁表活/促透修护体系
+                    </span>
+                    <input
+                      type="text"
+                      value={currentProduct.model343.surfactants}
+                      onChange={(e) => handleFieldChange('model343.surfactants', e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SGS Lab Proof Data */}
+              <div>
+                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5 mb-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>SGS 权威实验室功效数据 (Lab Proof Data)</span>
+                </label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[11px] font-medium text-slate-500 block mb-1">
+                      短期/即刻功效 (如控油8h)
+                    </span>
+                    <input
+                      type="text"
+                      value={currentProduct.sgsData.oil8h}
+                      onChange={(e) => handleFieldChange('sgsData.oil8h', e.target.value)}
+                      className="w-full px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-emerald-700 font-mono text-xs font-bold focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[11px] font-medium text-slate-500 block mb-1">
+                      中周期实测 (如14天出油)
+                    </span>
+                    <input
+                      type="text"
+                      value={currentProduct.sgsData.oil14d}
+                      onChange={(e) => handleFieldChange('sgsData.oil14d', e.target.value)}
+                      className="w-full px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-teal-700 font-mono text-xs font-bold focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[11px] font-medium text-slate-500 block mb-1">
+                      专项改善指标 (如黑头减少)
+                    </span>
+                    <input
+                      type="text"
+                      value={currentProduct.sgsData.blackhead14d}
+                      onChange={(e) => handleFieldChange('sgsData.blackhead14d', e.target.value)}
+                      className="w-full px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-sky-700 font-mono text-xs font-bold focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Custom Selling Points & Target Audience */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                    目标受众人群 (Target Audience)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={currentProduct.targetAudience || ''}
+                    onChange={(e) => handleFieldChange('targetAudience', e.target.value)}
+                    placeholder="如：18-35岁大油田、油敏肌、混油皮..."
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-emerald-500 focus:outline-none resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                    特色卖点草稿/自由描述 (Selling Points Draft)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={currentProduct.customSellingPoints || ''}
+                    onChange={(e) => handleFieldChange('customSellingPoints', e.target.value)}
+                    placeholder="可输入自由填写的卖点草稿，点击右上角【AI 润色与提炼卖点】自动生成规范配方..."
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-medium focus:bg-white focus:border-emerald-500 focus:outline-none resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Prohibited Words */}
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200">
+                <label className="text-xs font-bold text-rose-800 flex items-center gap-1.5 mb-1.5">
+                  <AlertTriangle className="w-4 h-4 text-rose-600" />
+                  <span>合规禁忌词 (Prohibited Words)</span>
+                </label>
+                <input
+                  type="text"
+                  value={currentProduct.prohibitedWords?.join(', ') || ''}
+                  onChange={(e) => handleFieldChange('prohibitedWords', e.target.value)}
+                  placeholder="用逗号分隔违规词，如：震惊！, 第一名！, 根治过敏"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-rose-200 text-rose-900 text-xs focus:border-rose-400 focus:outline-none"
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/90 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-colors"
-          >
-            知道了，返回流水线
-          </button>
+        {/* Modal Footer */}
+        <div className="px-6 py-3.5 border-t border-slate-200 bg-slate-50/80 flex items-center justify-between">
+          <div className="text-xs text-slate-500">
+            当前流水线生效产品: <span className="text-emerald-700 font-bold">{products.find(p => p.id === activeProductId)?.name}</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onClose}
+              className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors shadow-md shadow-emerald-600/20"
+            >
+              确定并返回流水线
+            </button>
+          </div>
         </div>
       </div>
     </div>

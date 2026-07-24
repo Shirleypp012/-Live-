@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { StepId, PipelineData, PresetTemplate, MaterialItem, TaskItem } from './types';
-import { MOCK_PRESET_TEMPLATES } from './data/presets';
+import { StepId, PipelineData, PresetTemplate, MaterialItem, TaskItem, ProductItem } from './types';
+import { MOCK_PRESET_TEMPLATES, INITIAL_PRODUCTS } from './data/presets';
 import { DEFAULT_MODEL_CONFIG, ModelConfigState } from './data/models';
 import { Navbar } from './components/Navbar';
 import { StepProgress } from './components/StepProgress';
@@ -14,7 +14,9 @@ import { PresetSelector } from './components/PresetSelector';
 import { ModelConfigCenterModal } from './components/ModelConfigCenterModal';
 import { MaterialManagerModal } from './components/MaterialManagerModal';
 import { TaskManagerModal } from './components/TaskManagerModal';
+import { BouncyCardsFeatures } from './components/ui/bounce-card-features';
 import { apiService } from './services/api';
+import { PackageCheck, Edit3 } from 'lucide-react';
 
 export default function App() {
   const [currentStep, setCurrentStep] = useState<StepId>(1);
@@ -26,6 +28,12 @@ export default function App() {
   const [isMaterialManagerOpen, setIsMaterialManagerOpen] = useState<boolean>(false);
   const [isTaskManagerOpen, setIsTaskManagerOpen] = useState<boolean>(false);
   const [isAutoPipelineRunning, setIsAutoPipelineRunning] = useState<boolean>(false);
+
+  // Products / Selling Points State
+  const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
+  const [activeProductId, setActiveProductId] = useState<string>(INITIAL_PRODUCTS[0].id);
+  const activeProduct = products.find((p) => p.id === activeProductId) || products[0] || INITIAL_PRODUCTS[0];
+
 
   // Sync handlers for user-controlled re-inheritance
   const handleSyncFromStep1 = () => {
@@ -102,7 +110,10 @@ export default function App() {
       const res1 = await fetch('/api/pipeline/step1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pipelineData.step1.inputs),
+        body: JSON.stringify({
+          ...pipelineData.step1.inputs,
+          productInfo: activeProduct,
+        }),
       });
       const result1 = await res1.json();
       if (!result1.success || !result1.data) throw new Error('Step 1 failed');
@@ -132,7 +143,10 @@ export default function App() {
       const res2 = await fetch('/api/pipeline/step2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedStep2Inputs),
+        body: JSON.stringify({
+          ...updatedStep2Inputs,
+          productInfo: activeProduct,
+        }),
       });
       const result2 = await res2.json();
       if (!result2.success || !result2.data) throw new Error('Step 2 failed');
@@ -161,7 +175,10 @@ export default function App() {
       const res3 = await fetch('/api/pipeline/step3', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedStep3Inputs),
+        body: JSON.stringify({
+          ...updatedStep3Inputs,
+          productInfo: activeProduct,
+        }),
       });
       const result3 = await res3.json();
       if (!result3.success || !result3.data) throw new Error('Step 3 failed');
@@ -190,7 +207,10 @@ export default function App() {
       const res4 = await fetch('/api/pipeline/step4', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedStep4Inputs),
+        body: JSON.stringify({
+          ...updatedStep4Inputs,
+          productInfo: activeProduct,
+        }),
       });
       const result4 = await res4.json();
       if (!result4.success || !result4.data) throw new Error('Step 4 failed');
@@ -218,6 +238,7 @@ export default function App() {
           videoPrompt: out2.video_prompt,
           title: out3.title,
           bgmTrack: out4.bgm_recommendation.track_name,
+          productInfo: activeProduct,
         }),
       });
       const result5 = await res5.json();
@@ -392,7 +413,10 @@ export default function App() {
       const res = await fetch('/api/pipeline/step1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pipelineData.step1.inputs),
+        body: JSON.stringify({
+          ...pipelineData.step1.inputs,
+          productInfo: activeProduct,
+        }),
       });
       const result = await res.json();
 
@@ -432,7 +456,10 @@ export default function App() {
       const res = await fetch('/api/pipeline/step2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pipelineData.step2.inputs),
+        body: JSON.stringify({
+          ...pipelineData.step2.inputs,
+          productInfo: activeProduct,
+        }),
       });
       const result = await res.json();
 
@@ -471,7 +498,10 @@ export default function App() {
       const res = await fetch('/api/pipeline/step3', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pipelineData.step3.inputs),
+        body: JSON.stringify({
+          ...pipelineData.step3.inputs,
+          productInfo: activeProduct,
+        }),
       });
       const result = await res.json();
 
@@ -510,7 +540,10 @@ export default function App() {
       const res = await fetch('/api/pipeline/step4', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(pipelineData.step4.inputs),
+        body: JSON.stringify({
+          ...pipelineData.step4.inputs,
+          productInfo: activeProduct,
+        }),
       });
       const result = await res.json();
 
@@ -546,6 +579,7 @@ export default function App() {
           videoPrompt: pipelineData.step2.output?.video_prompt,
           title: pipelineData.step3.output?.title,
           bgmTrack: pipelineData.step4.output?.bgm_recommendation.track_name,
+          productInfo: activeProduct,
         }),
       });
       const result = await res.json();
@@ -567,25 +601,72 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen font-sans selection:bg-emerald-500 selection:text-slate-950 transition-colors motionsites-grid ${
-      isDarkMode ? 'dark bg-[#0b0f17] text-slate-100' : 'bg-[#f8fafc] text-slate-900'
-    }`}>
+    <div className="min-h-screen font-sans selection:bg-emerald-500 selection:text-white transition-colors motionsites-grid bg-[#f8fafc] text-slate-900">
       {/* Top Navigation Bar */}
       <Navbar
         useMockMode={useMockMode}
         setUseMockMode={setUseMockMode}
-        isDarkMode={isDarkMode}
-        onToggleTheme={() => setIsDarkMode(!isDarkMode)}
         onOpenKnowledge={() => setIsKnowledgeOpen(true)}
         onOpenPresets={() => setIsPresetsOpen(true)}
         onOpenModelConfig={() => setIsModelConfigOpen(true)}
         onOpenMaterials={() => setIsMaterialManagerOpen(true)}
         onOpenTasks={() => setIsTaskManagerOpen(true)}
         onResetAll={handleResetAll}
+        activeProduct={activeProduct}
+        products={products}
+        onSelectActiveProduct={(id) => setActiveProductId(id)}
       />
 
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
+      {/* Feature Hero Section */}
+      <BouncyCardsFeatures />
+
+      {/* Main Pipeline Container */}
+      <main id="pipeline-start" className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
+        {/* Active Selling Points Bar */}
+        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-slate-50 to-teal-50 border border-emerald-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-surface-sm">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-700 border border-emerald-300/60 shrink-0">
+              <PackageCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-slate-500">流水线绑定卖点:</span>
+                <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-lg border border-emerald-200">
+                  {activeProduct.name}
+                </span>
+                <span className="text-[10px] text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-md font-medium">
+                  {activeProduct.category}
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mt-1 line-clamp-1">
+                {activeProduct.positioning} · {activeProduct.salesRecord}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+            <select
+              value={activeProduct.id}
+              onChange={(e) => setActiveProductId(e.target.value)}
+              className="px-3 py-1.5 rounded-xl bg-white text-slate-800 border border-slate-300 text-xs font-bold focus:outline-none cursor-pointer shadow-sm hover:border-emerald-400"
+            >
+              {products.map((p) => (
+                <option key={p.id} value={p.id} className="bg-white text-slate-900">
+                  切换产品: {p.name}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={() => setIsKnowledgeOpen(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-sm shrink-0 flex items-center gap-1.5 shadow-emerald-600/20"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>卖点库与AI润色</span>
+            </button>
+          </div>
+        </div>
+
         {/* Top Progress Tracker */}
         <StepProgress
           currentStep={currentStep}
@@ -761,6 +842,10 @@ export default function App() {
       <BrandKnowledgeModal
         isOpen={isKnowledgeOpen}
         onClose={() => setIsKnowledgeOpen(false)}
+        products={products}
+        activeProductId={activeProductId}
+        onSelectActiveProduct={(id) => setActiveProductId(id)}
+        onUpdateProducts={(updated) => setProducts(updated)}
       />
 
       {/* Preset Selector Modal */}

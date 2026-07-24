@@ -1,20 +1,14 @@
 @import "tailwindcss";
 
 @layer utilities {
-  /* MotionSites.ai style pixel micro dot grid background */
+  /* MotionSites style light pixel micro dot grid background */
   .motionsites-grid {
     background-color: #f8fafc;
-    background-image: radial-gradient(rgba(15, 23, 42, 0.07) 1px, transparent 1px);
-    background-size: 20px 20px;
+    background-image: radial-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 
-  .dark .motionsites-grid {
-    background-color: #0b0f17;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  /* Linear & Vercel style soft shadows & surfaces */
+  /* Linear & Vercel style soft shadows & surfaces for light theme */
   .shadow-surface-sm {
     box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03), 0 1px 3px 0 rgba(15, 23, 42, 0.04);
   }
@@ -24,8 +18,9 @@
   .shadow-surface-lg {
     box-shadow: 0 12px 32px -6px rgba(15, 23, 42, 0.08), 0 8px 16px -8px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.07);
   }
-  .shadow-glow-teal {
-    box-shadow: 0 0 20px -3px rgba(20, 184, 166, 0.25);
+
+  .shadow-glow-emerald {
+    box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.25);
   }
 }
 
@@ -45,9 +40,11 @@
   background: #94a3b8;
 }
 
-/* Smooth Base Transitions */
+/* Base Border Override */
 * {
   border-color: rgba(226, 232, 240, 0.8);
 }
+
+
 
 

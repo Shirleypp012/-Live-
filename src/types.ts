@@ -138,6 +138,32 @@ export interface TaskItem {
   thumbnailUrl?: string;
 }
 
+export interface ProductItem {
+  id: string;
+  name: string;
+  category: string;
+  positioning: string;
+  price: string;
+  salesRecord: string;
+  coverImage?: string;
+  model343: {
+    clays: string;
+    extracts: string;
+    surfactants: string;
+  };
+  sgsData: {
+    oil8h: string;
+    oil14d: string;
+    blackhead14d: string;
+  };
+  prohibitedWords: string[];
+  customSellingPoints?: string;
+  targetAudience?: string;
+  updatedAt?: string;
+}
+
+export type SellingPointsAiModel = 'deepseek-v3' | 'deepseek-r1' | 'gpt-4o' | 'gemini-3.6-flash';
+
 export interface PresetTemplate {
   id: string;
   title: string;
