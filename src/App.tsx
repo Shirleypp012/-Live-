@@ -1,32 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StepId, PipelineData, PresetTemplate, MaterialItem, TaskItem, ProductItem } from './types';
 import { MOCK_PRESET_TEMPLATES, INITIAL_PRODUCTS } from './data/presets';
 import { DEFAULT_MODEL_CONFIG, ModelConfigState } from './data/models';
 import { Navbar } from './components/Navbar';
+import { Sidebar, MainViewType } from './components/Sidebar';
+import { LoginScreen } from './components/LoginScreen';
 import { StepProgress } from './components/StepProgress';
 import { Step1Card } from './components/Step1Card';
 import { Step2Card } from './components/Step2Card';
 import { Step3Card } from './components/Step3Card';
 import { Step4Card } from './components/Step4Card';
 import { Step5Card } from './components/Step5Card';
-import { BrandKnowledgeModal } from './components/BrandKnowledgeModal';
-import { PresetSelector } from './components/PresetSelector';
-import { ModelConfigCenterModal } from './components/ModelConfigCenterModal';
-import { MaterialManagerModal } from './components/MaterialManagerModal';
-import { TaskManagerModal } from './components/TaskManagerModal';
-import { BouncyCardsFeatures } from './components/ui/bounce-card-features';
-import { apiService } from './services/api';
+import { OnboardingModal } from './components/OnboardingModal';
+
+// Full View Pages for Direct View Switching
+import { MaterialsPageView } from './views/MaterialsPageView';
+import { TasksPageView } from './views/TasksPageView';
+import { PresetsPageView } from './views/PresetsPageView';
+import { ModelsPageView } from './views/ModelsPageView';
+import { KnowledgePageView } from './views/KnowledgePageView';
+
 import { PackageCheck, Edit3 } from 'lucide-react';
 
 export default function App() {
+  // Authentication State (Credentials: haini / 888)
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem('aigc_is_logged_in') === 'true';
+  });
+
+  // Main Active View State (Direct page switching)
+  const [activeView, setActiveView] = useState<MainViewType>('pipeline');
+
+  // Sidebar Layout State
+  const [sidebarWidth, setSidebarWidth] = useState<number>(240);
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(true);
+
+  const handleSetSidebarWidth = (width: number) => {
+    setSidebarWidth(width);
+    if (width < 120) {
+      setIsSidebarExpanded(false);
+    } else {
+      setIsSidebarExpanded(true);
+    }
+  };
+
+  const handleToggleSidebar = () => {
+    if (isSidebarExpanded) {
+      setIsSidebarExpanded(false);
+      setSidebarWidth(68);
+    } else {
+      setIsSidebarExpanded(true);
+      setSidebarWidth(240);
+    }
+  };
+
+  // Onboarding Guide State
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
+
+  // Pipeline & Simulation States
   const [currentStep, setCurrentStep] = useState<StepId>(1);
   const [useMockMode, setUseMockMode] = useState<boolean>(true);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const [isKnowledgeOpen, setIsKnowledgeOpen] = useState<boolean>(false);
-  const [isPresetsOpen, setIsPresetsOpen] = useState<boolean>(false);
-  const [isModelConfigOpen, setIsModelConfigOpen] = useState<boolean>(false);
-  const [isMaterialManagerOpen, setIsMaterialManagerOpen] = useState<boolean>(false);
-  const [isTaskManagerOpen, setIsTaskManagerOpen] = useState<boolean>(false);
   const [isAutoPipelineRunning, setIsAutoPipelineRunning] = useState<boolean>(false);
 
   // Products / Selling Points State
@@ -34,6 +67,106 @@ export default function App() {
   const [activeProductId, setActiveProductId] = useState<string>(INITIAL_PRODUCTS[0].id);
   const activeProduct = products.find((p) => p.id === activeProductId) || products[0] || INITIAL_PRODUCTS[0];
 
+  const [modelConfig, setModelConfig] = useState<ModelConfigState>(DEFAULT_MODEL_CONFIG);
+  const [userRole, setUserRole] = useState<'admin' | 'user'>('admin');
+
+  // Materials & Tasks State
+  const [materials, setMaterials] = useState<MaterialItem[]>([
+    {
+      id: 'mat_1',
+      name: '纯净高质感膏体拉丝.mp4',
+      url: MOCK_PRESET_TEMPLATES[0]?.coverImage || 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80',
+      type: 'image',
+      size: '2.4 MB',
+      createdAt: '10:30',
+    },
+    {
+      id: 'mat_2',
+      name: '沉浸式晨间洗漱与泡泡揉搓.mp4',
+      url: MOCK_PRESET_TEMPLATES[1]?.coverImage || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+      type: 'image',
+      size: '4.8 MB',
+      createdAt: '11:15',
+    },
+    {
+      id: 'mat_3',
+      name: '油敏肌高清毛孔对比特写.mp4',
+      url: MOCK_PRESET_TEMPLATES[2]?.coverImage || 'https://images.unsplash.com/photo-1512290900673-7002fffe929a?auto=format&fit=crop&w=600&q=80',
+      type: 'image',
+      size: '3.1 MB',
+      createdAt: '12:00',
+    },
+  ]);
+
+  const [tasks, setTasks] = useState<TaskItem[]>([
+    {
+      id: 'TASK-883921',
+      title: '高奢治愈系小绿泥反推任务 #1',
+      createdAt: new Date().toLocaleString(),
+      status: 'completed',
+      currentStep: 5,
+      pipelineData: MOCK_PRESET_TEMPLATES[0].data,
+      thumbnailUrl: MOCK_PRESET_TEMPLATES[0]?.coverImage,
+    },
+  ]);
+
+  // Initialize pipeline data with defaults
+  const [pipelineData, setPipelineData] = useState<PipelineData>({
+    step1: {
+      status: 'pending',
+      inputs: {
+        mediaUrl: MOCK_PRESET_TEMPLATES[0].coverImage,
+        platform: 'xiaohongshu',
+        bloggerType: 'daily_seeding',
+        viralReason: '真实晨间浴室自然光+爆款小绿泥膏体拉丝特写',
+        imageModel: 'Imagen 4 Ultra',
+      },
+    },
+    step2: {
+      status: 'pending',
+      inputs: {
+        static_image_prompt: '',
+        imageUrl: '',
+        videoTone: 'xiaohongshu_healing',
+        durationSec: 4,
+        videoModel: 'Veo 3.1 Preview',
+      },
+    },
+    step3: {
+      status: 'pending',
+      inputs: {
+        videoPrompt: '',
+        targetPlatform: 'xiaohongshu',
+        scriptPersona: '油皮亲妈',
+      },
+    },
+    step4: {
+      status: 'pending',
+      inputs: {
+        copywritingTitle: '',
+        tonePreference: '治愈',
+        commercialScenario: '抖音/小红书商业化',
+      },
+    },
+    step5: {
+      status: 'pending',
+      inputs: {
+        aspectRatio: '9:16',
+        subtitleStyle: '黄字黑边',
+      },
+    },
+  });
+
+  // Handle Login Success
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem('aigc_is_logged_in', 'true');
+
+    // Requirement 4: Pop up onboarding guide immediately for new user login
+    if (localStorage.getItem('aigc_onboarding_completed') !== 'true') {
+      setIsOnboardingOpen(true);
+    }
+  };
 
   // Sync handlers for user-controlled re-inheritance
   const handleSyncFromStep1 = () => {
@@ -98,6 +231,7 @@ export default function App() {
   const runFullPipelineAuto = async () => {
     if (isAutoPipelineRunning) return;
     setIsAutoPipelineRunning(true);
+    setActiveView('pipeline');
 
     try {
       // 1. Step 1 Execution
@@ -256,96 +390,6 @@ export default function App() {
     }
   };
 
-  const [modelConfig, setModelConfig] = useState<ModelConfigState>(DEFAULT_MODEL_CONFIG);
-  const [userRole, setUserRole] = useState<'admin' | 'user'>('admin');
-
-  // Materials & Tasks State
-  const [materials, setMaterials] = useState<MaterialItem[]>([
-    {
-      id: 'mat_1',
-      name: '纯净高质感膏体拉丝.mp4',
-      url: MOCK_PRESET_TEMPLATES[0]?.coverImage || 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80',
-      type: 'image',
-      size: '2.4 MB',
-      createdAt: '10:30',
-    },
-    {
-      id: 'mat_2',
-      name: '沉浸式晨间洗漱与泡泡揉搓.mp4',
-      url: MOCK_PRESET_TEMPLATES[1]?.coverImage || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
-      type: 'image',
-      size: '4.8 MB',
-      createdAt: '11:15',
-    },
-    {
-      id: 'mat_3',
-      name: '油敏肌高清毛孔对比特写.mp4',
-      url: MOCK_PRESET_TEMPLATES[2]?.coverImage || 'https://images.unsplash.com/photo-1512290900673-7002fffe929a?auto=format&fit=crop&w=600&q=80',
-      type: 'image',
-      size: '3.1 MB',
-      createdAt: '12:00',
-    },
-  ]);
-
-  const [tasks, setTasks] = useState<TaskItem[]>([
-    {
-      id: 'TASK-883921',
-      title: '高奢治愈系小绿泥反推任务 #1',
-      createdAt: new Date().toLocaleString(),
-      status: 'completed',
-      currentStep: 5,
-      pipelineData: MOCK_PRESET_TEMPLATES[0].data,
-      thumbnailUrl: MOCK_PRESET_TEMPLATES[0]?.coverImage,
-    },
-  ]);
-
-  // Initialize pipeline data with defaults
-  const [pipelineData, setPipelineData] = useState<PipelineData>({
-    step1: {
-      status: 'pending',
-      inputs: {
-        mediaUrl: MOCK_PRESET_TEMPLATES[0].coverImage,
-        platform: 'xiaohongshu',
-        bloggerType: 'daily_seeding',
-        viralReason: '真实晨间浴室自然光+爆款小绿泥膏体拉丝特写',
-        imageModel: 'Imagen 4 Ultra',
-      },
-    },
-    step2: {
-      status: 'pending',
-      inputs: {
-        static_image_prompt: '',
-        imageUrl: '',
-        videoTone: 'xiaohongshu_healing',
-        durationSec: 4,
-        videoModel: 'Veo 3.1 Preview',
-      },
-    },
-    step3: {
-      status: 'pending',
-      inputs: {
-        videoPrompt: '',
-        targetPlatform: 'xiaohongshu',
-        scriptPersona: '油皮亲妈',
-      },
-    },
-    step4: {
-      status: 'pending',
-      inputs: {
-        copywritingTitle: '',
-        tonePreference: '治愈',
-        commercialScenario: '抖音/小红书商业化',
-      },
-    },
-    step5: {
-      status: 'pending',
-      inputs: {
-        aspectRatio: '9:16',
-        subtitleStyle: '黄字黑边',
-      },
-    },
-  });
-
   // Reset entire pipeline
   const handleResetAll = () => {
     setPipelineData({
@@ -394,12 +438,14 @@ export default function App() {
       },
     });
     setCurrentStep(1);
+    setActiveView('pipeline');
   };
 
   // Load a Preset Template
   const handleSelectPreset = (preset: PresetTemplate) => {
     setPipelineData(preset.data);
     setCurrentStep(1);
+    setActiveView('pipeline');
   };
 
   // Step 1 Execution
@@ -425,7 +471,6 @@ export default function App() {
         setPipelineData((prev) => ({
           ...prev,
           step1: { ...prev.step1, output, status: 'completed' },
-          // Auto propagate to step 2 inputs if step 2 is pending
           step2: {
             ...prev.step2,
             inputs: {
@@ -468,7 +513,6 @@ export default function App() {
         setPipelineData((prev) => ({
           ...prev,
           step2: { ...prev.step2, output, status: 'completed' },
-          // Auto propagate to step 3 inputs
           step3: {
             ...prev.step3,
             inputs: {
@@ -510,7 +554,6 @@ export default function App() {
         setPipelineData((prev) => ({
           ...prev,
           step3: { ...prev.step3, output, status: 'completed' },
-          // Auto propagate to step 4 inputs
           step4: {
             ...prev.step4,
             inputs: {
@@ -600,303 +643,334 @@ export default function App() {
     }
   };
 
+  // Render Login Screen if not authenticated
+  if (!isLoggedIn) {
+    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
-    <div className="min-h-screen font-sans selection:bg-emerald-500 selection:text-white transition-colors motionsites-grid bg-[#f8fafc] text-slate-900">
-      {/* Top Navigation Bar */}
-      <Navbar
+    <div className="flex min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-emerald-500 selection:text-white transition-colors">
+      {/* Resizable Sidebar */}
+      <Sidebar
+        sidebarWidth={sidebarWidth}
+        setSidebarWidth={handleSetSidebarWidth}
+        isExpanded={isSidebarExpanded}
+        onToggleExpand={handleToggleSidebar}
+        activeView={activeView}
+        onChangeView={(view) => setActiveView(view)}
+        onOpenOnboarding={() => setIsOnboardingOpen(true)}
+        onResetAll={handleResetAll}
         useMockMode={useMockMode}
         setUseMockMode={setUseMockMode}
-        onOpenKnowledge={() => setIsKnowledgeOpen(true)}
-        onOpenPresets={() => setIsPresetsOpen(true)}
-        onOpenModelConfig={() => setIsModelConfigOpen(true)}
-        onOpenMaterials={() => setIsMaterialManagerOpen(true)}
-        onOpenTasks={() => setIsTaskManagerOpen(true)}
-        onResetAll={handleResetAll}
         activeProduct={activeProduct}
         products={products}
         onSelectActiveProduct={(id) => setActiveProductId(id)}
       />
 
-      {/* Feature Hero Section */}
-      <BouncyCardsFeatures />
-
-      {/* Main Pipeline Container */}
-      <main id="pipeline-start" className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
-        {/* Active Selling Points Bar */}
-        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-slate-50 to-teal-50 border border-emerald-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-surface-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-700 border border-emerald-300/60 shrink-0">
-              <PackageCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold text-slate-500">流水线绑定卖点:</span>
-                <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-lg border border-emerald-200">
-                  {activeProduct.name}
-                </span>
-                <span className="text-[10px] text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-md font-medium">
-                  {activeProduct.category}
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 mt-1 line-clamp-1">
-                {activeProduct.positioning} · {activeProduct.salesRecord}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-            <select
-              value={activeProduct.id}
-              onChange={(e) => setActiveProductId(e.target.value)}
-              className="px-3 py-1.5 rounded-xl bg-white text-slate-800 border border-slate-300 text-xs font-bold focus:outline-none cursor-pointer shadow-sm hover:border-emerald-400"
-            >
-              {products.map((p) => (
-                <option key={p.id} value={p.id} className="bg-white text-slate-900">
-                  切换产品: {p.name}
-                </option>
-              ))}
-            </select>
-
-            <button
-              onClick={() => setIsKnowledgeOpen(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-sm shrink-0 flex items-center gap-1.5 shadow-emerald-600/20"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>卖点库与AI润色</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Top Progress Tracker */}
-        <StepProgress
-          currentStep={currentStep}
-          pipelineData={pipelineData}
-          onSelectStep={(stepId) => setCurrentStep(stepId)}
-          onRunFullPipelineAuto={runFullPipelineAuto}
-          isAutoPipelineRunning={isAutoPipelineRunning}
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+        <Navbar
+          isSidebarExpanded={isSidebarExpanded}
+          onToggleSidebar={handleToggleSidebar}
+          activeProduct={activeProduct}
+          useMockMode={useMockMode}
         />
 
-        {/* Step Cards Container */}
-        <div className="space-y-6">
-          {currentStep === 1 && (
-            <Step1Card
-              inputs={pipelineData.step1.inputs}
-              output={pipelineData.step1.output}
-              status={pipelineData.step1.status}
-              useMockMode={useMockMode}
-              modelConfig={modelConfig}
-              onOpenMaterials={() => setIsMaterialManagerOpen(true)}
-              onUpdateInputs={(inp) =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step1: { ...prev.step1, inputs: { ...prev.step1.inputs, ...inp } },
-                }))
-              }
-              onUpdateOutput={(updated) =>
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
+          {/* VIEW ROUTING */}
+
+          {/* 1. MATERIALS PAGE VIEW */}
+          {activeView === 'materials' && (
+            <MaterialsPageView
+              materials={materials}
+              onAddMaterials={(newItems) => setMaterials((prev) => [...newItems, ...prev])}
+              onDeleteMaterial={(id) => setMaterials((prev) => prev.filter((m) => m.id !== id))}
+              onSelectMaterial={(material) => {
                 setPipelineData((prev) => ({
                   ...prev,
                   step1: {
                     ...prev.step1,
-                    output: prev.step1.output ? { ...prev.step1.output, ...updated } : undefined,
+                    inputs: { ...prev.step1.inputs, mediaUrl: material.url },
                   },
-                }))
-              }
-              onRun={runStep1}
-              onReset={() =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step1: { ...prev.step1, status: 'pending', output: undefined },
-                }))
-              }
-              onNext={() => setCurrentStep(2)}
+                }));
+                setActiveView('pipeline');
+              }}
+              onBackToPipeline={() => setActiveView('pipeline')}
             />
           )}
 
-          {currentStep === 2 && (
-            <Step2Card
-              inputs={pipelineData.step2.inputs}
-              output={pipelineData.step2.output}
-              step1Output={pipelineData.step1.output}
-              status={pipelineData.step2.status}
-              useMockMode={useMockMode}
-              modelConfig={modelConfig}
-              onSyncFromStep1={handleSyncFromStep1}
-              onUpdateInputs={(inp) =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step2: { ...prev.step2, inputs: { ...prev.step2.inputs, ...inp } },
-                }))
-              }
-              onUpdateOutput={(updated) =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step2: {
-                    ...prev.step2,
-                    output: prev.step2.output ? { ...prev.step2.output, ...updated } : undefined,
-                  },
-                }))
-              }
-              onRun={runStep2}
-              onReset={() =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step2: { ...prev.step2, status: 'pending', output: undefined },
-                }))
-              }
-              onPrev={() => setCurrentStep(1)}
-              onNext={() => setCurrentStep(3)}
+          {/* 2. TASKS PAGE VIEW */}
+          {activeView === 'tasks' && (
+            <TasksPageView
+              tasks={tasks}
+              onSelectTask={(task) => {
+                setPipelineData(task.pipelineData);
+                setCurrentStep(task.currentStep || 1);
+                setActiveView('pipeline');
+              }}
+              onDeleteTask={(id) => setTasks((prev) => prev.filter((t) => t.id !== id))}
+              onBackToPipeline={() => setActiveView('pipeline')}
             />
           )}
 
-          {currentStep === 3 && (
-            <Step3Card
-              inputs={pipelineData.step3.inputs}
-              output={pipelineData.step3.output}
-              step2Output={pipelineData.step2.output}
-              status={pipelineData.step3.status}
-              useMockMode={useMockMode}
-              onSyncFromStep2={handleSyncFromStep2}
-              onUpdateInputs={(inp) =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step3: { ...prev.step3, inputs: { ...prev.step3.inputs, ...inp } },
-                }))
-              }
-              onUpdateOutput={(updated) =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step3: {
-                    ...prev.step3,
-                    output: prev.step3.output ? { ...prev.step3.output, ...updated } : undefined,
-                  },
-                }))
-              }
-              onRun={runStep3}
-              onReset={() =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step3: { ...prev.step3, status: 'pending', output: undefined },
-                }))
-              }
-              onPrev={() => setCurrentStep(2)}
-              onNext={() => setCurrentStep(4)}
+          {/* 3. PRESETS PAGE VIEW */}
+          {activeView === 'presets' && (
+            <PresetsPageView
+              onSelectPreset={handleSelectPreset}
+              onBackToPipeline={() => setActiveView('pipeline')}
             />
           )}
 
-          {currentStep === 4 && (
-            <Step4Card
-              inputs={pipelineData.step4.inputs}
-              output={pipelineData.step4.output}
-              step3Output={pipelineData.step3.output}
-              status={pipelineData.step4.status}
-              useMockMode={useMockMode}
-              onSyncFromStep3={handleSyncFromStep3}
-              onUpdateInputs={(inp) =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step4: { ...prev.step4, inputs: { ...prev.step4.inputs, ...inp } },
-                }))
-              }
-              onRun={runStep4}
-              onReset={() =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step4: { ...prev.step4, status: 'pending', output: undefined },
-                }))
-              }
-              onPrev={() => setCurrentStep(3)}
-              onNext={() => setCurrentStep(5)}
+          {/* 4. MODELS PAGE VIEW */}
+          {activeView === 'models' && (
+            <ModelsPageView
+              config={modelConfig}
+              onSaveConfig={(newConfig) => setModelConfig(newConfig)}
+              userRole={userRole}
+              onToggleRole={() => setUserRole((prev) => (prev === 'admin' ? 'user' : 'admin'))}
+              onBackToPipeline={() => setActiveView('pipeline')}
             />
           )}
 
-          {currentStep === 5 && (
-            <Step5Card
-              inputs={pipelineData.step5.inputs}
-              output={pipelineData.step5.output}
-              step2Output={pipelineData.step2.output}
-              step3Output={pipelineData.step3.output}
-              step4Output={pipelineData.step4.output}
-              status={pipelineData.step5.status}
-              useMockMode={useMockMode}
-              onSyncFromPrevSteps={handleSyncFromPrevSteps}
-              onUpdateInputs={(inp) =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step5: { ...prev.step5, inputs: { ...prev.step5.inputs, ...inp } },
-                }))
-              }
-              onRun={runStep5}
-              onReset={() =>
-                setPipelineData((prev) => ({
-                  ...prev,
-                  step5: { ...prev.step5, status: 'pending', output: undefined },
-                }))
-              }
-              onPrev={() => setCurrentStep(4)}
+          {/* 5. KNOWLEDGE PAGE VIEW */}
+          {activeView === 'knowledge' && (
+            <KnowledgePageView
+              products={products}
+              activeProductId={activeProductId}
+              onSelectActiveProduct={(id) => setActiveProductId(id)}
+              onUpdateProducts={(updated) => setProducts(updated)}
+              onBackToPipeline={() => setActiveView('pipeline')}
             />
           )}
-        </div>
-      </main>
 
-      {/* Brand Knowledge Base Modal */}
-      <BrandKnowledgeModal
-        isOpen={isKnowledgeOpen}
-        onClose={() => setIsKnowledgeOpen(false)}
-        products={products}
-        activeProductId={activeProductId}
-        onSelectActiveProduct={(id) => setActiveProductId(id)}
-        onUpdateProducts={(updated) => setProducts(updated)}
-      />
+          {/* 6. MAIN PIPELINE VIEW */}
+          {activeView === 'pipeline' && (
+            <div className="space-y-6">
+              {/* Active Selling Points Banner */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-slate-50 to-teal-50 border border-emerald-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-surface-sm">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-700 border border-emerald-300/60 shrink-0">
+                    <PackageCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold text-slate-500">流水线绑定卖点:</span>
+                      <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-lg border border-emerald-200">
+                        {activeProduct.name}
+                      </span>
+                      <span className="text-[10px] text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-md font-medium">
+                        {activeProduct.category}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 mt-1 line-clamp-1">
+                      {activeProduct.positioning} · {activeProduct.salesRecord}
+                    </p>
+                  </div>
+                </div>
 
-      {/* Preset Selector Modal */}
-      <PresetSelector
-        isOpen={isPresetsOpen}
-        onClose={() => setIsPresetsOpen(false)}
-        onSelectPreset={handleSelectPreset}
-      />
+                <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                  <select
+                    value={activeProduct.id}
+                    onChange={(e) => setActiveProductId(e.target.value)}
+                    className="px-3 py-1.5 rounded-xl bg-white text-slate-800 border border-slate-300 text-xs font-bold focus:outline-none cursor-pointer shadow-sm hover:border-emerald-400"
+                  >
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id} className="bg-white text-slate-900">
+                        切换产品: {p.name}
+                      </option>
+                    ))}
+                  </select>
 
-      {/* Model Config Center Modal */}
-      <ModelConfigCenterModal
-        isOpen={isModelConfigOpen}
-        onClose={() => setIsModelConfigOpen(false)}
-        config={modelConfig}
-        onSaveConfig={(newConfig) => setModelConfig(newConfig)}
-        userRole={userRole}
-        onToggleRole={() => setUserRole((prev) => (prev === 'admin' ? 'user' : 'admin'))}
-      />
+                  <button
+                    onClick={() => setActiveView('knowledge')}
+                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-sm shrink-0 flex items-center gap-1.5 shadow-emerald-600/20"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>切换到卖点库页面</span>
+                  </button>
+                </div>
+              </div>
 
-      {/* Material Manager Modal */}
-      <MaterialManagerModal
-        isOpen={isMaterialManagerOpen}
-        onClose={() => setIsMaterialManagerOpen(false)}
-        materials={materials}
-        onAddMaterials={(newItems) => setMaterials((prev) => [...newItems, ...prev])}
-        onDeleteMaterial={(id) => setMaterials((prev) => prev.filter((m) => m.id !== id))}
-        onSelectMaterial={(material) =>
-          setPipelineData((prev) => ({
-            ...prev,
-            step1: {
-              ...prev.step1,
-              inputs: { ...prev.step1.inputs, mediaUrl: material.url },
-            },
-          }))
-        }
-      />
+              {/* Top Step Progress Indicator */}
+              <StepProgress
+                currentStep={currentStep}
+                pipelineData={pipelineData}
+                onSelectStep={(stepId) => setCurrentStep(stepId)}
+                onRunFullPipelineAuto={runFullPipelineAuto}
+                isAutoPipelineRunning={isAutoPipelineRunning}
+              />
 
-      {/* Task Manager Modal */}
-      <TaskManagerModal
-        isOpen={isTaskManagerOpen}
-        onClose={() => setIsTaskManagerOpen(false)}
-        tasks={tasks}
-        onSelectTask={(task) => {
-          setPipelineData(task.pipelineData);
-          setCurrentStep(task.currentStep || 1);
-        }}
-        onDeleteTask={(id) => setTasks((prev) => prev.filter((t) => t.id !== id))}
-        onReRunTask={(task) => {
-          setPipelineData(task.pipelineData);
-          setCurrentStep(1);
-        }}
+              {/* Active Step Cards Container */}
+              <div className="space-y-6">
+                {currentStep === 1 && (
+                  <Step1Card
+                    inputs={pipelineData.step1.inputs}
+                    output={pipelineData.step1.output}
+                    status={pipelineData.step1.status}
+                    useMockMode={useMockMode}
+                    modelConfig={modelConfig}
+                    onOpenMaterials={() => setActiveView('materials')}
+                    onUpdateInputs={(inp) =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step1: { ...prev.step1, inputs: { ...prev.step1.inputs, ...inp } },
+                      }))
+                    }
+                    onUpdateOutput={(updated) =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step1: {
+                          ...prev.step1,
+                          output: prev.step1.output ? { ...prev.step1.output, ...updated } : undefined,
+                        },
+                      }))
+                    }
+                    onRun={runStep1}
+                    onReset={() =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step1: { ...prev.step1, status: 'pending', output: undefined },
+                      }))
+                    }
+                    onNext={() => setCurrentStep(2)}
+                  />
+                )}
+
+                {currentStep === 2 && (
+                  <Step2Card
+                    inputs={pipelineData.step2.inputs}
+                    output={pipelineData.step2.output}
+                    step1Output={pipelineData.step1.output}
+                    status={pipelineData.step2.status}
+                    useMockMode={useMockMode}
+                    modelConfig={modelConfig}
+                    onSyncFromStep1={handleSyncFromStep1}
+                    onUpdateInputs={(inp) =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step2: { ...prev.step2, inputs: { ...prev.step2.inputs, ...inp } },
+                      }))
+                    }
+                    onUpdateOutput={(updated) =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step2: {
+                          ...prev.step2,
+                          output: prev.step2.output ? { ...prev.step2.output, ...updated } : undefined,
+                        },
+                      }))
+                    }
+                    onRun={runStep2}
+                    onReset={() =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step2: { ...prev.step2, status: 'pending', output: undefined },
+                      }))
+                    }
+                    onPrev={() => setCurrentStep(1)}
+                    onNext={() => setCurrentStep(3)}
+                  />
+                )}
+
+                {currentStep === 3 && (
+                  <Step3Card
+                    inputs={pipelineData.step3.inputs}
+                    output={pipelineData.step3.output}
+                    step2Output={pipelineData.step2.output}
+                    status={pipelineData.step3.status}
+                    useMockMode={useMockMode}
+                    onSyncFromStep2={handleSyncFromStep2}
+                    onUpdateInputs={(inp) =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step3: { ...prev.step3, inputs: { ...prev.step3.inputs, ...inp } },
+                      }))
+                    }
+                    onUpdateOutput={(updated) =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step3: {
+                          ...prev.step3,
+                          output: prev.step3.output ? { ...prev.step3.output, ...updated } : undefined,
+                        },
+                      }))
+                    }
+                    onRun={runStep3}
+                    onReset={() =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step3: { ...prev.step3, status: 'pending', output: undefined },
+                      }))
+                    }
+                    onPrev={() => setCurrentStep(2)}
+                    onNext={() => setCurrentStep(4)}
+                  />
+                )}
+
+                {currentStep === 4 && (
+                  <Step4Card
+                    inputs={pipelineData.step4.inputs}
+                    output={pipelineData.step4.output}
+                    step3Output={pipelineData.step3.output}
+                    status={pipelineData.step4.status}
+                    useMockMode={useMockMode}
+                    onSyncFromStep3={handleSyncFromStep3}
+                    onUpdateInputs={(inp) =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step4: { ...prev.step4, inputs: { ...prev.step4.inputs, ...inp } },
+                      }))
+                    }
+                    onRun={runStep4}
+                    onReset={() =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step4: { ...prev.step4, status: 'pending', output: undefined },
+                      }))
+                    }
+                    onPrev={() => setCurrentStep(3)}
+                    onNext={() => setCurrentStep(5)}
+                  />
+                )}
+
+                {currentStep === 5 && (
+                  <Step5Card
+                    inputs={pipelineData.step5.inputs}
+                    output={pipelineData.step5.output}
+                    step2Output={pipelineData.step2.output}
+                    step3Output={pipelineData.step3.output}
+                    step4Output={pipelineData.step4.output}
+                    status={pipelineData.step5.status}
+                    useMockMode={useMockMode}
+                    onSyncFromPrevSteps={handleSyncFromPrevSteps}
+                    onUpdateInputs={(inp) =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step5: { ...prev.step5, inputs: { ...prev.step5.inputs, ...inp } },
+                      }))
+                    }
+                    onRun={runStep5}
+                    onReset={() =>
+                      setPipelineData((prev) => ({
+                        ...prev,
+                        step5: { ...prev.step5, status: 'pending', output: undefined },
+                      }))
+                    }
+                    onPrev={() => setCurrentStep(4)}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Onboarding Guide Modal */}
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        onStartAutoPipeline={runFullPipelineAuto}
+        onOpenKnowledge={() => setActiveView('knowledge')}
       />
     </div>
   );
