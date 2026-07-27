@@ -162,7 +162,7 @@ export interface ProductItem {
   updatedAt?: string;
 }
 
-export type SellingPointsAiModel = 'deepseek-v3' | 'deepseek-r1' | 'gpt-4o' | 'gemini-3.6-flash';
+export type SellingPointsAiModel = 'deepseek-v3' | 'deepseek-r1' | 'gpt-4o' | 'gemini-3.6-flash' | 'claude-3.5-sonnet';
 
 export interface PresetTemplate {
   id: string;

@@ -13,6 +13,13 @@ export type VideoModelName =
   | 'Seedance 2.0'
   | 'Seedance 2.0 Fast';
 
+export type TextModelName =
+  | 'DeepSeek V3'
+  | 'DeepSeek R1'
+  | 'GPT-4o'
+  | 'Gemini 3.6 Flash'
+  | 'Claude 3.5 Sonnet';
+
 export interface ModelMetadata<T extends string = string> {
   id: T;
   name: string;
@@ -30,6 +37,86 @@ export interface ModelMetadata<T extends string = string> {
   isDefault?: boolean;
   isCustom?: boolean;
 }
+
+export const INITIAL_TEXT_MODELS: ModelMetadata<TextModelName>[] = [
+  {
+    id: 'DeepSeek V3',
+    name: 'DeepSeek V3',
+    provider: 'DeepSeek AI Platform',
+    baseUrl: 'https://api.deepseek.com/v1',
+    apiKey: 'sk-ds-prod-v3-commercial-key-998',
+    modelCode: 'deepseek-chat',
+    recommendedScenario: '卖点库提炼、电商爆款文案生成与脚本脚构重论',
+    speedRating: '极快',
+    speedMs: '0.8s',
+    qualityRating: '专业级',
+    description: '深度求索商业旗舰 LLM，极高性价比与极致中文电商文案提炼能力',
+    badge: 'AI推荐首选',
+    enabled: true,
+    isDefault: true,
+  },
+  {
+    id: 'DeepSeek R1',
+    name: 'DeepSeek R1',
+    provider: 'DeepSeek AI Platform',
+    baseUrl: 'https://api.deepseek.com/v1',
+    apiKey: 'sk-ds-prod-r1-reasoning-key-881',
+    modelCode: 'deepseek-reasoner',
+    recommendedScenario: '深度思维链推理、复杂成分配方推演与合规规避分析',
+    speedRating: '标准',
+    speedMs: '2.5s',
+    qualityRating: '影视级',
+    description: '具有深度思考力的推理大模型，精准推演爆款痛点与受众转化逻辑',
+    badge: '深度推理',
+    enabled: true,
+    isDefault: false,
+  },
+  {
+    id: 'GPT-4o',
+    name: 'GPT-4o',
+    provider: 'OpenAI Enterprise',
+    baseUrl: 'https://api.openai.com/v1',
+    apiKey: 'sk-proj-openai-gpt4o-enterprise-key',
+    modelCode: 'gpt-4o',
+    recommendedScenario: '全能高保真文案润色、海外跨境爆款翻译与多语种重构',
+    speedRating: '快速',
+    speedMs: '1.2s',
+    qualityRating: '专业级',
+    description: 'OpenAI 旗舰全能大语言模型，具备极强的跨平台转化洞察力',
+    enabled: true,
+    isDefault: false,
+  },
+  {
+    id: 'Gemini 3.6 Flash',
+    name: 'Gemini 3.6 Flash',
+    provider: 'Google Gemini AIGC',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+    apiKey: 'sk-google-gemini-pro-production-v1',
+    modelCode: 'gemini-3.6-flash',
+    recommendedScenario: '5步工作台全链路反推、快速响应与结构化提炼',
+    speedRating: '极快',
+    speedMs: '0.9s',
+    qualityRating: '专业级',
+    description: 'Google 极速高多模态模型，完美适配视频首帧解析与结构化方案输出',
+    enabled: true,
+    isDefault: false,
+  },
+  {
+    id: 'Claude 3.5 Sonnet',
+    name: 'Claude 3.5 Sonnet',
+    provider: 'Anthropic AI',
+    baseUrl: 'https://api.anthropic.com/v1',
+    apiKey: 'sk-ant-api03-claude35-sonnet-key',
+    modelCode: 'claude-3-5-sonnet-20241022',
+    recommendedScenario: '高质感长文案创作、品牌故事拟定与情感共鸣文案',
+    speedRating: '标准',
+    speedMs: '1.8s',
+    qualityRating: '影视级',
+    description: '细腻情感文案王者，打造富有品牌韵味的高客单价带货脚本',
+    enabled: true,
+    isDefault: false,
+  },
+];
 
 export const INITIAL_IMAGE_MODELS: ModelMetadata<ImageModelName>[] = [
   {
@@ -205,17 +292,21 @@ export const INITIAL_VIDEO_MODELS: ModelMetadata<VideoModelName>[] = [
 ];
 
 export interface ModelConfigState {
+  textModels: ModelMetadata<TextModelName>[];
   imageModels: ModelMetadata<ImageModelName>[];
   videoModels: ModelMetadata<VideoModelName>[];
   autoRecommendationEnabled: boolean;
+  defaultTextModel: TextModelName;
   defaultImageModel: ImageModelName;
   defaultVideoModel: VideoModelName;
 }
 
 export const DEFAULT_MODEL_CONFIG: ModelConfigState = {
+  textModels: INITIAL_TEXT_MODELS,
   imageModels: INITIAL_IMAGE_MODELS,
   videoModels: INITIAL_VIDEO_MODELS,
   autoRecommendationEnabled: true,
+  defaultTextModel: 'DeepSeek V3',
   defaultImageModel: 'Imagen 4 Ultra',
   defaultVideoModel: 'Veo 3.1 Preview',
 };

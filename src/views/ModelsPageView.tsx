@@ -3,16 +3,13 @@ import {
   ShieldCheck,
   Cpu,
   Check,
-  Sparkles,
   Sliders,
-  Lock,
   Plus,
   Trash2,
   Edit2,
   Activity,
   Eye,
   EyeOff,
-  AlertCircle,
   Globe,
   Key,
   ArrowLeft,
@@ -43,7 +40,7 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
   onBackToPipeline,
 }) => {
   const [localConfig, setLocalConfig] = useState<ModelConfigState>(config);
-  const [activeTab, setActiveTab] = useState<'image' | 'video'>('image');
+  const [activeTab, setActiveTab] = useState<'text' | 'image' | 'video'>('text');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Edit / Add Form state
@@ -228,31 +225,31 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Header Banner */}
-      <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-surface-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button
             onClick={onBackToPipeline}
-            className="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors flex items-center gap-1.5 text-xs font-bold shrink-0"
-            title="返回主流水线"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 shadow-2xs transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 cursor-pointer"
+            title="返回主工作台"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>返回流水线</span>
+            <ArrowLeft className="w-4 h-4 text-slate-500" />
+            <span>返回工作台</span>
           </button>
 
-          <div className="p-3 rounded-2xl bg-sky-500/10 text-sky-600 border border-sky-500/20 shrink-0">
+          <div className="p-3 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60 shrink-0">
             <Cpu className="w-6 h-6" />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-extrabold text-slate-900">大模型与提示词规则配置中心</h1>
+              <h1 className="text-lg font-bold text-slate-900">大模型与提示词规则配置中心</h1>
               <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-bold border flex items-center gap-1 ${
+                className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border flex items-center gap-1 ${
                   userRole === 'admin'
                     ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                    : 'bg-blue-50 text-blue-700 border-blue-200/60'
                 }`}
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
@@ -267,32 +264,42 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
 
         <button
           onClick={onToggleRole}
-          className="px-4 py-2 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all shadow-sm flex items-center gap-2 shrink-0"
+          className="px-4 py-2 rounded-lg border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all shadow-2xs flex items-center gap-2 shrink-0 cursor-pointer"
         >
-          <Eye className="w-4 h-4 text-sky-600" />
+          <Eye className="w-4 h-4 text-slate-500" />
           <span>切换视角: {userRole === 'admin' ? '普通用户视图' : '管理员模式'}</span>
         </button>
       </div>
 
       {/* Mode / Tabs Bar */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-surface-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setActiveTab('text')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              activeTab === 'text'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'bg-slate-100/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            🧠 文本 / 卖点 AI 模型 ({(localConfig.textModels || []).length})
+          </button>
+          <button
             onClick={() => setActiveTab('image')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'image'
-                ? 'bg-sky-600 text-white shadow-md'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'bg-slate-100/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             📷 静态图片模型 ({localConfig.imageModels.length})
           </button>
           <button
             onClick={() => setActiveTab('video')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'video'
-                ? 'bg-teal-600 text-white shadow-md'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'bg-slate-100/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             🎬 图生视频模型 ({localConfig.videoModels.length})
@@ -303,9 +310,9 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
           {userRole === 'admin' && (
             <button
               onClick={() => handleOpenAddForm(activeTab)}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition-all shadow-md flex items-center gap-1.5"
+              className="px-4 py-2 rounded-lg text-xs font-semibold bg-white border border-slate-200/80 hover:bg-slate-50 text-slate-700 transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-blue-600" />
               <span>新增{activeTab === 'image' ? '图片' : '视频'} AI 模型</span>
             </button>
           )}
@@ -313,7 +320,7 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
           {userRole === 'admin' && (
             <button
               onClick={handleSave}
-              className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-all flex items-center gap-1.5"
+              className="px-5 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               {saveSuccess ? (
                 <>
@@ -329,10 +336,14 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
       </div>
 
       {/* Models Grid */}
-      <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-surface-sm">
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {(activeTab === 'image' ? localConfig.imageModels : localConfig.videoModels).map(
-            (model: ModelMetadata) => {
+          {(activeTab === 'text'
+            ? (localConfig.textModels || [])
+            : activeTab === 'image'
+            ? localConfig.imageModels
+            : localConfig.videoModels
+          ).map((model: ModelMetadata) => {
               const testResult = testResults[model.id];
               const isTesting = testingModelId === model.id;
               const isKeyShown = Boolean(showKeyMap[model.id]);
@@ -340,23 +351,23 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
               return (
                 <div
                   key={model.id}
-                  className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                  className={`p-5 rounded-xl border transition-all flex flex-col justify-between ${
                     model.enabled
-                      ? 'bg-white border-slate-200/90 shadow-surface-sm hover:border-sky-400'
-                      : 'bg-slate-50 border-slate-200 opacity-60'
+                      ? 'bg-white border-slate-200/80 shadow-2xs'
+                      : 'bg-slate-50/50 border-slate-200/60 opacity-60'
                   }`}
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-extrabold text-base text-slate-900">{model.name}</h3>
+                          <h3 className="font-bold text-base text-slate-900">{model.name}</h3>
                           {model.isDefault && (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                               默认首选
                             </span>
                           )}
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60">
                             {model.provider || 'AI Provider'}
                           </span>
                         </div>
@@ -370,14 +381,14 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
                           <>
                             <button
                               onClick={() => handleOpenEditForm(model, activeTab)}
-                              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                               title="编辑"
                             >
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteModel(model.id, activeTab)}
-                              className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                               title="删除"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -392,10 +403,10 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
                               ? handleToggleEnableImage(model.id as any)
                               : handleToggleEnableVideo(model.id as any)
                           }
-                          className={`px-3 py-1 rounded-xl text-xs font-bold border transition-colors ${
+                          className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                             model.enabled
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : 'bg-slate-200 text-slate-600 border-slate-300'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : 'bg-slate-100 text-slate-500 border border-slate-200'
                           }`}
                         >
                           {model.enabled ? '已启用' : '未启用'}
@@ -403,24 +414,24 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
                       </div>
                     </div>
 
-                    <div className="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2 text-xs font-mono">
+                    <div className="mt-3 p-3 rounded-lg bg-slate-50 border border-slate-200/80 space-y-2 text-xs font-mono">
                       <div className="flex items-center justify-between text-slate-600">
-                        <span className="flex items-center gap-1">
-                          <Globe className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="flex items-center gap-1 font-semibold text-slate-700">
+                          <Globe className="w-3.5 h-3.5 text-blue-600" />
                           <span>Base URL:</span>
                         </span>
-                        <span className="truncate max-w-[240px] text-slate-900 font-bold">
+                        <span className="truncate max-w-[240px] text-slate-800 font-medium">
                           {model.baseUrl || 'https://generativelanguage.googleapis.com'}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between text-slate-600">
-                        <span className="flex items-center gap-1">
-                          <Key className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="flex items-center gap-1 font-semibold text-slate-700">
+                          <Key className="w-3.5 h-3.5 text-blue-600" />
                           <span>API Key:</span>
                         </span>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-slate-900 font-bold">
+                          <span className="text-slate-800 font-medium">
                             {isKeyShown
                               ? model.apiKey || '环境变量 GEMINI_API_KEY'
                               : model.apiKey
@@ -446,18 +457,18 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
                       <button
                         onClick={() => handleTestConnection(model)}
                         disabled={isTesting}
-                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 shadow-2xs transition-colors flex items-center gap-1 cursor-pointer"
                       >
-                        <Activity className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin text-sky-500' : ''}`} />
+                        <Activity className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin text-blue-600' : ''}`} />
                         <span>{isTesting ? '检测中...' : '测试接口连通性'}</span>
                       </button>
 
                       {testResult && (
                         <span
-                          className={`px-2.5 py-0.5 rounded-lg text-xs font-bold ${
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                             testResult.success
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-rose-50 text-rose-700 border border-rose-200'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-rose-50 text-rose-700 border-rose-200'
                           }`}
                         >
                           {testResult.message}
@@ -472,7 +483,7 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
                             ? handleSetDefaultImage(model.id as any)
                             : handleSetDefaultVideo(model.id as any)
                         }
-                        className="text-xs text-slate-500 hover:text-sky-600 font-bold underline flex items-center gap-1"
+                        className="text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 cursor-pointer"
                       >
                         <Sliders className="w-3.5 h-3.5" />
                         <span>设为默认</span>
@@ -488,65 +499,65 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
 
       {/* Edit Form Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white text-slate-900 border border-slate-200 rounded-3xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white text-slate-900 border border-slate-200/90 rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                <Server className="w-4 h-4 text-sky-600" />
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Server className="w-4 h-4 text-blue-600" />
                 <span>{editingModel ? '编辑 AI 模型' : `新增${formType === 'image' ? '图片' : '视频'} AI 模型`}</span>
               </h3>
               <button
                 onClick={() => setIsFormOpen(false)}
-                className="text-slate-400 hover:text-slate-700"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveForm} className="space-y-3 text-xs font-sans">
+            <form onSubmit={handleSaveForm} className="space-y-3 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">模型展示名称 *</label>
+                <label className="block font-semibold text-slate-700 mb-1">模型展示名称 *</label>
                 <input
                   type="text"
                   required
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="例如：Gemini 3.6 Ultra HD"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-900 focus:outline-none focus:border-sky-500"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs font-medium"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">API Base URL *</label>
+                <label className="block font-semibold text-slate-700 mb-1">API Base URL *</label>
                 <input
                   type="text"
                   required
                   value={formBaseUrl}
                   onChange={(e) => setFormBaseUrl(e.target.value)}
                   placeholder="https://generativelanguage.googleapis.com/v1beta"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-mono text-slate-900 focus:outline-none focus:border-sky-500"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 font-mono text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">API Key</label>
+                <label className="block font-semibold text-slate-700 mb-1">API Key</label>
                 <input
                   type="password"
                   value={formApiKey}
                   onChange={(e) => setFormApiKey(e.target.value)}
                   placeholder="sk-proj-..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-mono text-slate-900 focus:outline-none focus:border-sky-500"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 font-mono text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">场景描述</label>
+                <label className="block font-semibold text-slate-700 mb-1">场景描述</label>
                 <textarea
                   rows={2}
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
                   placeholder="描述模型适用场景"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-900 focus:outline-none focus:border-sky-500"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs"
                 />
               </div>
 
@@ -554,13 +565,13 @@ export const ModelsPageView: React.FC<ModelsPageViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsFormOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100"
+                  className="px-4 py-2 rounded-lg border border-slate-200/80 text-xs font-semibold bg-white text-slate-700 hover:bg-slate-100 shadow-2xs cursor-pointer"
                 >
                   取消
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white shadow-md"
+                  className="px-5 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-2xs cursor-pointer"
                 >
                   保存模型
                 </button>

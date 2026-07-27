@@ -8,7 +8,6 @@ import {
   Film,
   Eye,
   X,
-  Sparkles,
   ArrowLeft,
 } from 'lucide-react';
 import { MaterialItem } from '../types';
@@ -55,27 +54,27 @@ export const MaterialsPageView: React.FC<MaterialsPageViewProps> = ({
   });
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Top Banner & Header */}
-      <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-surface-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button
             onClick={onBackToPipeline}
-            className="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors flex items-center gap-1.5 text-xs font-bold shrink-0"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 shadow-2xs transition-all flex items-center gap-1.5 text-xs font-semibold shrink-0 cursor-pointer"
             title="返回主流水线"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 text-slate-500" />
             <span>返回流水线</span>
           </button>
 
-          <div className="p-3 rounded-2xl bg-teal-500/10 text-teal-600 border border-teal-500/20 shrink-0">
+          <div className="p-3 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60 shrink-0">
             <Film className="w-6 h-6" />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-extrabold text-slate-900">爆款短视频与图片素材库</h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200 text-xs font-bold">
+              <h1 className="text-lg font-bold text-slate-900">爆款短视频与图片素材库</h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 text-[11px] font-semibold">
                 MEDIA ASSETS
               </span>
             </div>
@@ -85,14 +84,14 @@ export const MaterialsPageView: React.FC<MaterialsPageViewProps> = ({
           </div>
         </div>
 
-        <div className="text-right text-xs font-semibold text-slate-500 hidden sm:block">
-          已纳管 <span className="text-teal-600 font-bold text-sm">{materials.length}</span> 个灵感素材
+        <div className="text-right text-xs font-medium text-slate-500 hidden sm:block bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-xl shadow-2xs">
+          已纳管 <span className="text-slate-900 font-bold text-sm">{materials.length}</span> 个灵感素材
         </div>
       </div>
 
       {/* Upload Dropzone Section */}
-      <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-surface-sm">
-        <label className="relative group border-2 border-dashed border-slate-300 hover:border-teal-500 rounded-2xl p-8 bg-slate-50/50 hover:bg-teal-50/30 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-3">
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
+        <label className="relative group border border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-8 bg-slate-50/50 hover:bg-blue-50/30 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-3">
           <input
             type="file"
             multiple
@@ -100,14 +99,14 @@ export const MaterialsPageView: React.FC<MaterialsPageViewProps> = ({
             className="hidden"
             onChange={(e) => handleFileUpload(e.target.files)}
           />
-          <div className="p-4 rounded-full bg-teal-100 text-teal-700 shadow-sm group-hover:scale-110 transition-transform">
-            <Upload className="w-8 h-8" />
+          <div className="p-3.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60 group-hover:scale-105 transition-transform">
+            <Upload className="w-7 h-7" />
           </div>
           <div>
-            <p className="text-sm font-extrabold text-slate-800">
+            <p className="text-xs font-bold text-slate-900">
               {isUploading ? '素材正在解析上传中...' : '点击上传或将爆款视频/原图拖拽至此处'}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-[11px] text-slate-500 mt-1">
               支持 MP4, MOV, JPG, PNG, Live Photo 等格式多选批量导入
             </p>
           </div>
@@ -115,60 +114,60 @@ export const MaterialsPageView: React.FC<MaterialsPageViewProps> = ({
       </div>
 
       {/* Filter Tabs */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-surface-sm flex flex-wrap items-center justify-between gap-3">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab('all')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'all'
-                ? 'bg-slate-900 text-white shadow-md'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'bg-slate-100/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             全部素材 ({materials.length})
           </button>
           <button
             onClick={() => setActiveTab('video')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'video'
-                ? 'bg-teal-600 text-white shadow-md'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'bg-slate-100/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             🎬 视频素材 ({materials.filter((m) => m.type === 'video').length})
           </button>
           <button
             onClick={() => setActiveTab('image')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'image'
-                ? 'bg-cyan-600 text-white shadow-md'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-blue-600 text-white shadow-2xs'
+                : 'bg-slate-100/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             📷 图片素材 ({materials.filter((m) => m.type === 'image').length})
           </button>
         </div>
 
-        <span className="text-xs font-medium text-slate-500">
+        <span className="text-xs text-slate-500">
           选中素材后点击【导入流水线】即可将素材填充至Step 1
         </span>
       </div>
 
       {/* Materials Grid */}
-      <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-surface-sm">
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
         {filteredMaterials.length === 0 ? (
           <div className="py-20 text-center text-slate-400 space-y-2">
-            <Film className="w-12 h-12 mx-auto opacity-40 text-teal-600" />
-            <p className="text-sm font-bold text-slate-600">暂无素材，请上传你的短视频或图文素材</p>
+            <Film className="w-10 h-10 mx-auto text-slate-300" />
+            <p className="text-xs font-semibold text-slate-600">暂无素材，请上传你的短视频或图文素材</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {filteredMaterials.map((item) => (
               <div
                 key={item.id}
-                className="group relative bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-surface-sm hover:shadow-surface-md transition-all flex flex-col justify-between"
+                className="group relative bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-2xs hover:border-slate-300 transition-all flex flex-col justify-between"
               >
-                <div className="relative aspect-video bg-slate-900 overflow-hidden">
+                <div className="relative aspect-video bg-slate-950 overflow-hidden border-b border-slate-100">
                   {item.type === 'video' ? (
                     <div className="relative w-full h-full">
                       <video
@@ -179,26 +178,26 @@ export const MaterialsPageView: React.FC<MaterialsPageViewProps> = ({
                         onMouseOver={(e) => (e.target as HTMLVideoElement).play()}
                         onMouseOut={(e) => (e.target as HTMLVideoElement).pause()}
                       />
-                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-slate-950/80 text-white text-[10px] font-mono flex items-center gap-1">
-                        <Video className="w-3 h-3 text-emerald-400" />
+                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-900/80 text-white text-[10px] font-semibold flex items-center gap-1 backdrop-blur-xs">
+                        <Video className="w-3 h-3 text-blue-400" />
                         <span>{item.duration || '00:15'}</span>
                       </div>
                     </div>
                   ) : (
                     <div className="relative w-full h-full">
                       <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
-                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-slate-950/80 text-white text-[10px] font-mono flex items-center gap-1">
-                        <ImageIcon className="w-3 h-3 text-cyan-400" />
+                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-900/80 text-white text-[10px] font-semibold flex items-center gap-1 backdrop-blur-xs">
+                        <ImageIcon className="w-3 h-3 text-blue-400" />
                         <span>IMAGE</span>
                       </div>
                     </div>
                   )}
 
                   {/* Hover Controls */}
-                  <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
+                  <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
                     <button
                       onClick={() => setSelectedPreview(item)}
-                      className="p-2.5 rounded-xl bg-white/20 hover:bg-white/40 text-white transition-colors"
+                      className="p-2 rounded-lg bg-white/90 text-slate-700 hover:bg-white shadow-2xs transition-colors cursor-pointer"
                       title="预览全屏"
                     >
                       <Eye className="w-4 h-4" />
@@ -208,7 +207,7 @@ export const MaterialsPageView: React.FC<MaterialsPageViewProps> = ({
                         onSelectMaterial(item);
                         onBackToPipeline();
                       }}
-                      className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
                     >
                       <Check className="w-4 h-4" />
                       <span>导入流水线</span>
@@ -216,15 +215,15 @@ export const MaterialsPageView: React.FC<MaterialsPageViewProps> = ({
                   </div>
                 </div>
 
-                <div className="p-3 flex items-center justify-between text-xs">
+                <div className="p-3 flex items-center justify-between text-xs bg-white">
                   <div>
-                    <p className="font-bold text-slate-800 truncate max-w-[140px]">{item.name}</p>
+                    <p className="font-bold text-slate-900 truncate max-w-[140px]">{item.name}</p>
                     <p className="text-[10px] text-slate-400 mt-0.5">{item.size}</p>
                   </div>
 
                   <button
                     onClick={() => onDeleteMaterial(item.id)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                     title="删除"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -238,18 +237,18 @@ export const MaterialsPageView: React.FC<MaterialsPageViewProps> = ({
 
       {/* Preview Player Modal */}
       {selectedPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="bg-slate-900 text-white rounded-3xl max-w-3xl w-full p-4 overflow-hidden space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <h3 className="font-bold text-sm truncate">{selectedPreview.name}</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white text-slate-900 border border-slate-200/90 shadow-xl rounded-2xl max-w-3xl w-full p-4 overflow-hidden space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 className="font-bold text-sm truncate text-slate-900">{selectedPreview.name}</h3>
               <button
                 onClick={() => setSelectedPreview(null)}
-                className="p-1 text-slate-400 hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="rounded-2xl overflow-hidden bg-black flex items-center justify-center max-h-[70vh]">
+            <div className="rounded-xl overflow-hidden bg-black border border-slate-200 flex items-center justify-center max-h-[70vh]">
               {selectedPreview.type === 'video' ? (
                 <video src={selectedPreview.url} controls autoPlay className="max-h-[70vh] w-full" />
               ) : (

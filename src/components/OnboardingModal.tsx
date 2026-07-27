@@ -6,17 +6,11 @@ import {
   ArrowLeft,
   X,
   BookOpen,
-  Zap,
   CheckCircle2,
-  Play,
   Film,
   Layers,
   Cpu,
-  Video,
-  FileText,
-  Music,
   HelpCircle,
-  Lightbulb,
 } from 'lucide-react';
 
 interface OnboardingModalProps {
@@ -29,82 +23,69 @@ interface OnboardingModalProps {
 const ONBOARDING_STEPS = [
   {
     id: 1,
-    title: '欢迎体验 AI 爆款视频反推工作台',
-    tagline: '短视频反向工程 · 结构化 AIGC 生产链',
+    title: '欢迎体验 AI 爆款视频反推与重构工作台',
+    tagline: '短视频反向工程 · 结构化 AIGC 商业落地',
     description:
-      '本工作台基于 BUV (Bottom-Up Video) 爆款视频反推算法，帮你将任何爆款短视频/Live图精准拆解，并全自动重构为全新的高转化率带货视频工程。',
+      '本工作台基于 BUV (Bottom-Up Video) 爆款视频反推算法，将爆款短视频或 Live 图精准拆解，并重构为高转化率带货视频工程。',
     highlights: [
-      { icon: Film, label: '全流程 5 步贯通', desc: '从视频解析到画面Prompt、爆款文案、BGM卡点及成片导出' },
-      { icon: Zap, label: '一键全自动生成', desc: '支持 Step 1→5 上下文无缝继承，全路径 AI 智能反推' },
-      { icon: BookOpen, label: '品牌卖点绑定', desc: '自动注入产品SGS实验数据与合规禁忌词，确保带货真实性' },
+      { icon: Film, label: '全流程 5 步贯通', desc: '从视频视觉解析到镜头运镜、爆款脚本文案、BGM卡点及成片导出' },
+      { icon: BookOpen, label: '品牌卖点库深度绑定', desc: '自动注入产品核心配方、SGS 实测数据与合规避坑词' },
     ],
-    color: 'from-emerald-500 to-teal-600',
-    accentBg: 'bg-emerald-50 border-emerald-200 text-emerald-800',
   },
   {
     id: 2,
-    title: 'Step 1: 绑定品牌卖点库',
-    tagline: '让 AI 懂你的产品，拒绝虚假宣传与硬广',
+    title: 'Step 1: 绑定品牌卖点与知识资产库',
+    tagline: '深度融合 DeepSeek V3 / R1 & GPT-4o 多模型',
     description:
-      '在顶部【卖点库】中，你可以自由录入或选择不同的产品（包含核心技术配方、SGS实测功效数据、违规词、目标人群）。',
+      '在【卖点库】中，你可以自由录入或选定不同产品。AI 卖点提炼引擎将帮助你一键提炼专业配方与高转化带货痛点。',
     highlights: [
-      { icon: BookOpen, label: '自定义卖点输入', desc: '自由填写配方草稿，并提供丰富行业产品预设模板' },
-      { icon: Cpu, label: 'AI 卖点润色', desc: '支持 DeepSeek V3 / R1 / Gemini 一键润色提炼专业卖点' },
-      { icon: CheckCircle2, label: '合规禁忌词预警', desc: '生成文案时自动避开违规广告词，确保投放安全' },
+      { icon: BookOpen, label: '自定义卖点与行业预设', desc: '提供美妆护肤、数码科技、食品饮料等丰富的行业爆款产品模板' },
+      { icon: Cpu, label: 'AI 深度卖点润色', desc: '支持 DeepSeek V3 / R1 / GPT-4o / Gemini 一键润色提炼规范卖点' },
+      { icon: CheckCircle2, label: '合规禁忌词智能避坑', desc: '文案生成时自动规避极限词与违规广告词，确保商业投放安全' },
     ],
-    color: 'from-teal-500 to-cyan-600',
-    accentBg: 'bg-teal-50 border-teal-200 text-teal-800',
   },
   {
     id: 3,
-    title: '拆解 BUV 5步核心反推流水线',
-    tagline: '5 个步骤环环相扣，实现专业级短视频重构',
+    title: '拆解 BUV 5步核心反推工作台',
+    tagline: '5 个核心模块环环相扣，实现专业级短视频重构',
     description:
-      '在页面主区域，你将体验到清晰递进的 5 步反推卡片：',
+      '在工作台主区域，你将体验到清晰递进的 5 步爆款视频生成与剪辑模块：',
     pipelineItems: [
-      { step: 'Step 1', title: '视觉抽帧与静态图 Prompt', desc: '提取视频黄金帧与视觉构图，生成中英文精准画面提示词', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-      { step: 'Step 2', title: '镜头运镜与动态轨迹', desc: '推拉摇移运镜设定，可一键发送至 AI 视频渲染引擎（Kling/Runway）', color: 'bg-sky-100 text-sky-800 border-sky-200' },
-      { step: 'Step 3', title: '爆款带货脚本文案', desc: '黄金 3 秒 Hook 抓人眼球，结合卖点库生成口播与花字字幕', color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
-      { step: 'Step 4', title: '智能卡点 BGM & 音效', desc: '匹配抖音/小红书热歌 BPM，精确对齐画面转场与高潮拍子', color: 'bg-purple-100 text-purple-800 border-purple-200' },
-      { step: 'Step 5', title: '综合成片预览与打包', desc: '实时合成视频预览，提供脚本/音频/剪映草稿完整工程导出', color: 'bg-amber-100 text-amber-800 border-amber-200' },
+      { step: 'Step 1', title: '视觉抽帧与静态图 Prompt', desc: '提取视频黄金帧，生成适配 Imagen/Midjourney 的提示词' },
+      { step: 'Step 2', title: '运镜轨迹与动态 Prompt', desc: '设定推拉摇移运镜，支持发送至 AI 视频渲染引擎（Veo3 / Kling）' },
+      { step: 'Step 3', title: '爆款带货脚本文案', desc: '黄金 3 秒 Hook 抓人眼球，结合卖点库生成口播与爆款花字' },
+      { step: 'Step 4', title: '智能卡点 BGM & 剪辑', desc: '匹配抖音/小红书热歌 BPM，并提供人工精细剪辑（字体/音效/BGM）' },
+      { step: 'Step 5', title: '综合成片预览与工程打包', desc: '实时合成视频预览，提供高清 MP4、视频字幕与剪映草稿工程导出' },
     ],
-    color: 'from-sky-500 to-indigo-600',
-    accentBg: 'bg-sky-50 border-sky-200 text-sky-800',
   },
   {
     id: 4,
-    title: '高级功能：预设、模型与任务中心',
-    tagline: '媲美专业 AIGC 团队的工作流基础设施',
+    title: '高级功能：模型配置中心与任务资产',
+    tagline: '媲美专业 AIGC 团队的落地级生产基础设施',
     description:
-      '顶部导航栏为你提供了完善的辅助矩阵，帮助提升创作效率与控制粒度：',
+      '侧边栏导航为你提供了完善的专业辅助矩阵，提升创作效率与控制粒度：',
     highlights: [
-      { icon: Layers, label: '爆款预设库', desc: '内置美妆护肤、数码测评、美食探店等热门短视频爆款模板' },
-      { icon: Cpu, label: '模型配置中心', desc: '自由切换 DeepSeek、Gemini 3.6 Flash、GPT-4o 及各类视频生成模型' },
-      { icon: Film, label: '素材与任务中心', desc: '管理上传的视频素材与后台正在运行的 AI 渲染任务' },
+      { icon: Layers, label: '爆款预设模版库', desc: '内置美妆护肤、数码测评、美食探店等热门短视频爆款模板' },
+      { icon: Cpu, label: 'AI 模型配置中心', desc: '自由配置 DeepSeek、GPT-4o、Gemini 3.6 及 Imagen/Veo3 API 密钥' },
+      { icon: Film, label: '视频素材与后台任务', desc: '管理上传的视频素材与后台正在运行的 AI 高并发渲染任务' },
     ],
-    color: 'from-purple-500 to-fuchsia-600',
-    accentBg: 'bg-purple-50 border-purple-200 text-purple-800',
   },
   {
     id: 5,
     title: '准备完毕！开启你的第一个爆款生成',
-    tagline: '一键全自动运行，体验 AI 的无限创意',
+    tagline: '开启商业落地级短视频重构',
     description:
-      '你可以直接点击【⚡ 一键全自动贯通反推】，工作台将使用默认示例视频全自动依次执行 Step 1 到 Step 5，为你呈现完整的反推成片效果！',
+      '点击开始体验，工作台将为你呈现完整的反推与重构成果！',
     highlights: [
-      { icon: Zap, label: '即刻全自动贯通', desc: '自动顺序执行 5 步流程，30秒内获得完整爆款成果' },
-      { icon: Lightbulb, label: '自由编辑调整', desc: '任何步骤都可以随时手动微调，替换素材或重新生成' },
+      { icon: Sparkles, label: '全流程智能贯通', desc: '自动无缝链接 5 步流程，极速获得完整爆款成果工程' },
+      { icon: Film, label: '人工精细剪辑与微调', desc: '支持随时微调画面 Prompt、文案风格、替换 BGM 与修剪轨道' },
     ],
-    color: 'from-amber-500 to-emerald-600',
-    accentBg: 'bg-amber-50 border-amber-200 text-amber-800',
   },
 ];
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   isOpen,
   onClose,
-  onStartAutoPipeline,
-  onOpenKnowledge,
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [dontShowAgain, setDontShowAgain] = useState(false);
@@ -136,23 +117,16 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     onClose();
   };
 
-  const handleStartAuto = () => {
-    handleComplete();
-    if (onStartAutoPipeline) {
-      onStartAutoPipeline();
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in overflow-y-auto">
-      <div className="bg-white border border-slate-200/90 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden my-auto flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs overflow-y-auto">
+      <div className="bg-white text-slate-900 border border-slate-200/90 rounded-2xl w-full max-w-2xl shadow-xl overflow-hidden my-auto flex flex-col">
         {/* Header Progress Bar */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+            <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/60">
               <Sparkles className="w-4 h-4" />
             </div>
-            <span className="text-xs font-bold text-slate-800">
+            <span className="text-xs font-semibold text-slate-900">
               新手操作指南 ({currentStepIndex + 1} / {ONBOARDING_STEPS.length})
             </span>
           </div>
@@ -165,9 +139,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 onClick={() => setCurrentStepIndex(idx)}
                 className={`h-2 rounded-full transition-all cursor-pointer ${
                   idx === currentStepIndex
-                    ? 'w-6 bg-emerald-600'
+                    ? 'w-6 bg-blue-600'
                     : idx < currentStepIndex
-                    ? 'w-2 bg-emerald-300'
+                    ? 'w-2 bg-emerald-500'
                     : 'w-2 bg-slate-200'
                 }`}
                 title={`跳转到第 ${idx + 1} 步`}
@@ -177,7 +151,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
           <button
             onClick={handleComplete}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
             title="关闭引导"
           >
             <X className="w-4 h-4" />
@@ -185,45 +159,45 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
         </div>
 
         {/* Animated Body Content */}
-        <div className="p-6 md:p-8 flex-1 overflow-y-auto">
+        <div className="p-6 md:p-8 flex-1 overflow-y-auto bg-white">
           <AnimatePresence mode="wait">
             <motion.div
               key={step.id}
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 15 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-6"
+              exit={{ opacity: 0, x: -15 }}
+              transition={{ duration: 0.18 }}
+              className="space-y-5"
             >
               {/* Title & Tagline Banner */}
               <div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 mb-2">
-                  <HelpCircle className="w-3.5 h-3.5 text-emerald-600" />
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200/60 mb-2">
+                  <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
                   <span>{step.tagline}</span>
                 </div>
-                <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
                   {step.title}
                 </h3>
-                <p className="text-xs md:text-sm text-slate-600 mt-2 leading-relaxed">
+                <p className="text-xs md:text-sm text-slate-500 mt-2 leading-relaxed">
                   {step.description}
                 </p>
               </div>
 
-              {/* Highlights Cards (Steps 1, 2, 4, 5) */}
+              {/* Highlights Cards */}
               {step.highlights && (
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-2.5">
                   {step.highlights.map((item, idx) => {
                     const Icon = item.icon;
                     return (
                       <div
                         key={idx}
-                        className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-emerald-300 transition-all flex items-start gap-3 shadow-surface-sm"
+                        className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-blue-50/50 transition-colors flex items-start gap-3"
                       >
-                        <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 shrink-0 mt-0.5 border border-emerald-200/60">
+                        <div className="p-2 rounded-lg bg-blue-100 text-blue-700 shrink-0 mt-0.5">
                           <Icon className="w-4 h-4" />
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-slate-900">
+                          <h4 className="text-xs font-semibold text-slate-900">
                             {item.label}
                           </h4>
                           <p className="text-xs text-slate-500 mt-0.5">
@@ -245,11 +219,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3 text-xs"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <span className={`px-2 py-0.5 rounded font-bold font-mono text-[11px] border shrink-0 ${p.color}`}>
+                        <span className="px-2 py-0.5 rounded-md font-semibold text-[11px] bg-blue-50 text-blue-700 border border-blue-200/60 shrink-0">
                           {p.step}
                         </span>
                         <div className="truncate">
-                          <span className="font-bold text-slate-900 mr-2">{p.title}</span>
+                          <span className="font-semibold text-slate-900 mr-2">{p.title}</span>
                           <span className="text-slate-500 hidden sm:inline text-[11px]">{p.desc}</span>
                         </div>
                       </div>
@@ -262,13 +236,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
         </div>
 
         {/* Footer Navigation Bar */}
-        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <label className="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={dontShowAgain}
               onChange={(e) => setDontShowAgain(e.target.checked)}
-              className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
             />
             <span>不再自动弹出新手指南</span>
           </label>
@@ -277,7 +251,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             {!isFirst && (
               <button
                 onClick={handlePrev}
-                className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all flex items-center gap-1"
+                className="px-3.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-medium transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>上一步</span>
@@ -285,25 +259,16 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
             )}
 
             {isLast ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleComplete}
-                  className="px-4 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all"
-                >
-                  直接探索
-                </button>
-                <button
-                  onClick={handleStartAuto}
-                  className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5 active:scale-95"
-                >
-                  <Zap className="w-4 h-4 fill-amber-300 text-amber-300" />
-                  <span>一键运行全自动反推</span>
-                </button>
-              </div>
+              <button
+                onClick={handleComplete}
+                className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-2xs transition-all cursor-pointer"
+              >
+                开始体验工作台
+              </button>
             ) : (
               <button
                 onClick={handleNext}
-                className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5 active:scale-95"
+                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <span>下一步</span>
                 <ArrowRight className="w-3.5 h-3.5" />

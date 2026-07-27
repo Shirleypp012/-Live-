@@ -18,6 +18,8 @@ import {
   MessageSquare,
   Edit3,
   RefreshCw,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { PromptEditorModal } from './PromptEditorModal';
 
@@ -56,6 +58,7 @@ export const Step3Card: React.FC<Step3CardProps> = ({
   const [activeTab, setActiveTab] = useState<'visual' | 'json'>('visual');
   const [previewPlatform, setPreviewPlatform] = useState<'douyin' | 'xiaohongshu'>('douyin');
   const [isScriptEditorOpen, setIsScriptEditorOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const isRunning = status === 'running';
   const isCompleted = status === 'completed' && Boolean(output);
@@ -99,7 +102,13 @@ export const Step3Card: React.FC<Step3CardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-surface-md overflow-hidden transition-all">
+    <div
+      className={
+        isFullscreen
+          ? 'fixed inset-0 z-50 bg-white dark:bg-slate-900 overflow-y-auto p-6 md:p-8 flex flex-col shadow-2xl transition-all'
+          : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-surface-md overflow-hidden transition-all'
+      }
+    >
       {/* Header */}
       <div className="px-6 py-4 bg-slate-50/80 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -116,7 +125,28 @@ export const Step3Card: React.FC<Step3CardProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-surface-sm ${
+              isFullscreen
+                ? 'bg-cyan-600 text-white hover:bg-cyan-700'
+                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+            }`}
+            title={isFullscreen ? '退出全屏沉浸模式' : '进入全屏沉浸模式操作'}
+          >
+            {isFullscreen ? (
+              <>
+                <Minimize2 className="w-3.5 h-3.5" />
+                <span>退出全屏</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-3.5 h-3.5 text-cyan-600" />
+                <span>全屏沉浸</span>
+              </>
+            )}
+          </button>
           <button
             onClick={onPrev}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-surface-sm"

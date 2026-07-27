@@ -1,30 +1,33 @@
 @import "tailwindcss";
 
-@layer utilities {
-  /* MotionSites style light pixel micro dot grid background */
-  .motionsites-grid {
-    background-color: #f8fafc;
-    background-image: radial-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px);
-    background-size: 24px 24px;
-  }
-
-  /* Linear & Vercel style soft shadows & surfaces for light theme */
-  .shadow-surface-sm {
-    box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03), 0 1px 3px 0 rgba(15, 23, 42, 0.04);
-  }
-  .shadow-surface-md {
-    box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03), 0 0 0 1px rgba(15, 23, 42, 0.06);
-  }
-  .shadow-surface-lg {
-    box-shadow: 0 12px 32px -6px rgba(15, 23, 42, 0.08), 0 8px 16px -8px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.07);
-  }
-
-  .shadow-glow-emerald {
-    box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.25);
-  }
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
 }
 
-/* Custom Scrollbar */
+:root {
+  --bg-app: #f8fafc;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Refined Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -39,12 +42,3 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
-
-/* Base Border Override */
-* {
-  border-color: rgba(226, 232, 240, 0.8);
-}
-
-
-
-

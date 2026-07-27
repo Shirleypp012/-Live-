@@ -18,7 +18,14 @@ import {
   FileCode,
   Eye,
   RefreshCw,
+  Maximize2,
+  Minimize2,
+  Scissors,
+  Film,
+  Type,
+  Volume2,
 } from 'lucide-react';
+import { ArtificialVideoEditor } from './ArtificialVideoEditor';
 
 interface Step4CardProps {
   inputs: Step4Inputs;
@@ -50,6 +57,8 @@ export const Step4Card: React.FC<Step4CardProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
   const [activeTab, setActiveTab] = useState<'visual' | 'json'>('visual');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isArtificialEditorOpen, setIsArtificialEditorOpen] = useState(false);
 
   const isRunning = status === 'running';
   const isCompleted = status === 'completed' && Boolean(output);
@@ -63,7 +72,22 @@ export const Step4Card: React.FC<Step4CardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-surface-md overflow-hidden transition-all">
+    <div
+      className={
+        isFullscreen
+          ? 'fixed inset-0 z-50 bg-white dark:bg-slate-900 overflow-y-auto p-6 md:p-8 flex flex-col shadow-2xl transition-all'
+          : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-surface-md overflow-hidden transition-all'
+      }
+    >
+      {/* Artificial Video Editor Fullscreen Overlay */}
+      {isArtificialEditorOpen && (
+        <ArtificialVideoEditor
+          initialTitle={inputs.copywritingTitle || '高奢小绿泥晨间洗漱'}
+          initialBgmTrack={output?.bgm_recommendation?.track_name || 'Chill Lofi Beats - Morning Routine'}
+          onClose={() => setIsArtificialEditorOpen(false)}
+        />
+      )}
+
       {/* Header */}
       <div className="px-6 py-4 bg-slate-50/80 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -72,15 +96,46 @@ export const Step4Card: React.FC<Step4CardProps> = ({
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              第 4 步：文案 + 视频 → 匹配 BGM 音轨
+              第 4 步：文案 + 视频 → 匹配 BGM 音轨 & 人工精细剪辑
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              情绪匹配 + BPM 节奏卡点点位推荐（优先匹配免版权 / 抖音小红书带货可商用曲目）
+              情绪匹配 + BPM 节奏卡点点位推荐 + 支持人工多轨道剪辑（字体、BGM、音效、字幕等）
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Artificial Video Editor Launch Button */}
+          <button
+            onClick={() => setIsArtificialEditorOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-md shadow-indigo-500/20"
+            title="打开人工剪辑工作台 (字体、BGM、音效等)"
+          >
+            <Scissors className="w-3.5 h-3.5" />
+            <span>人工剪辑工作台</span>
+          </button>
+
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-surface-sm ${
+              isFullscreen
+                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+            }`}
+            title={isFullscreen ? '退出全屏沉浸模式' : '进入全屏沉浸模式操作'}
+          >
+            {isFullscreen ? (
+              <>
+                <Minimize2 className="w-3.5 h-3.5" />
+                <span>退出全屏</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-3.5 h-3.5 text-indigo-600" />
+                <span>全屏沉浸</span>
+              </>
+            )}
+          </button>
           <button
             onClick={onPrev}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-surface-sm"
@@ -120,7 +175,7 @@ export const Step4Card: React.FC<Step4CardProps> = ({
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 fill-current" />
-                <span>运行 ▶</span>
+                <span>运行 </span>
               </>
             )}
           </button>
@@ -163,6 +218,30 @@ export const Step4Card: React.FC<Step4CardProps> = ({
                 <span>同步 Step 3 结果</span>
               </button>
             )}
+          </div>
+
+          {/* Artificial Video Editing Workbench Feature Card */}
+          <div className="p-3.5 bg-gradient-to-r from-purple-900/20 via-indigo-900/20 to-slate-900/40 dark:from-purple-950/50 dark:via-indigo-950/50 dark:to-slate-900/80 border border-purple-500/30 rounded-xl flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-md">
+                <Scissors className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-bold text-slate-800 dark:text-slate-100 block">
+                  人工精细剪辑与自定义音效字幕
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  支持多轨道剪辑、自定义字体、精细卡点、BGM及音效独立控制
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsArtificialEditorOpen(true)}
+              className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-lg font-bold text-xs shadow-md transition-all shrink-0 flex items-center gap-1.5"
+            >
+              <span>进入剪辑台</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <div>

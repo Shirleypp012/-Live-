@@ -16,8 +16,6 @@ import {
   AlertCircle,
   Globe,
   Key,
-  Layers,
-  ArrowRight,
   Server,
 } from 'lucide-react';
 import {
@@ -46,7 +44,7 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
   onToggleRole,
 }) => {
   const [localConfig, setLocalConfig] = useState<ModelConfigState>(config);
-  const [activeTab, setActiveTab] = useState<'image' | 'video'>('image');
+  const [activeTab, setActiveTab] = useState<'text' | 'image' | 'video'>('text');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Edit / Add Modal state
@@ -234,31 +232,31 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-md animate-fade-in">
-      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-surface-lg w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden transition-all">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs">
+      <div className="bg-white text-slate-900 border border-slate-200/90 rounded-2xl shadow-xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden transition-all">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/90">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <div className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-200/60">
               <Cpu className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                <h2 className="text-base font-bold text-slate-900">
                   AI 模型配置中心 (Model Management Center)
                 </h2>
                 <span
-                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium border flex items-center gap-1 ${
+                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border flex items-center gap-1 ${
                     userRole === 'admin'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30'
-                      : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-slate-100 text-slate-600 border-slate-200'
                   }`}
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
                   {userRole === 'admin' ? '超级管理员模式' : '普通用户模式 (只读选择)'}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 管理图片/视频 AI 接入模型、自定义 Base URL & API Key、连接状态校验与默认推荐策略
               </p>
             </div>
@@ -268,16 +266,16 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
             {/* Switch Role Button */}
             <button
               onClick={onToggleRole}
-              className="text-xs px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors flex items-center gap-1.5 shadow-surface-sm"
+              className="text-xs px-3 py-1.5 rounded-lg border border-slate-200/80 bg-white text-slate-700 font-medium hover:bg-slate-100 transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer"
               title="切换管理员/普通用户身份"
             >
-              <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+              <Eye className="w-3.5 h-3.5 text-slate-500" />
               <span>切换身份: {userRole === 'admin' ? '普通用户视图' : '管理员模式'}</span>
             </button>
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -286,16 +284,16 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
 
         {/* User Role Banner */}
         {userRole === 'user' && (
-          <div className="bg-amber-50 dark:bg-amber-500/10 border-b border-amber-200/80 dark:border-amber-500/20 px-6 py-2.5 flex items-center justify-between text-xs text-amber-800 dark:text-amber-300">
+          <div className="bg-amber-50 border-b border-amber-200/60 px-6 py-2.5 flex items-center justify-between text-xs text-amber-800">
             <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <Lock className="w-4 h-4 shrink-0 text-amber-600" />
               <span>
                 当前为普通用户只读状态，只能选择管理员开启的模型。如需添加新模型、修改 API 密钥或调整默认模型，请切换至【管理员模式】。
               </span>
             </div>
             <button
               onClick={onToggleRole}
-              className="underline font-semibold text-amber-900 dark:text-amber-200 hover:text-amber-700 shrink-0 ml-2"
+              className="underline font-semibold text-amber-900 hover:text-amber-700 shrink-0 ml-2 cursor-pointer"
             >
               快速开启管理员
             </button>
@@ -303,24 +301,34 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
         )}
 
         {/* Tab & Global Controls Bar */}
-        <div className="px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="px-6 py-3 bg-white border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setActiveTab('text')}
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'text'
+                  ? 'bg-blue-600 text-white shadow-2xs'
+                  : 'bg-slate-100/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <span>🧠 文本 / 卖点 AI 模型 ({(localConfig.textModels || []).length})</span>
+            </button>
+            <button
               onClick={() => setActiveTab('image')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'image'
-                  ? 'bg-emerald-600 text-white shadow-surface-sm'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  ? 'bg-blue-600 text-white shadow-2xs'
+                  : 'bg-slate-100/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <span>📷 静态图片模型 ({localConfig.imageModels.length})</span>
             </button>
             <button
               onClick={() => setActiveTab('video')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'video'
-                  ? 'bg-teal-600 text-white shadow-surface-sm'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  ? 'bg-blue-600 text-white shadow-2xs'
+                  : 'bg-slate-100/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <span>🎬 图生视频模型 ({localConfig.videoModels.length})</span>
@@ -328,7 +336,7 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer">
               <input
                 type="checkbox"
                 disabled={userRole !== 'admin'}
@@ -340,16 +348,16 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                     autoRecommendationEnabled: e.target.checked,
                   }))
                 }
-                className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
               />
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               <span>启用 AI 智能自动场景匹配与模型推荐</span>
             </label>
 
             {userRole === 'admin' && (
               <button
                 onClick={() => handleOpenAddForm(activeTab)}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center gap-1.5 shadow-surface-sm shrink-0"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>新增{activeTab === 'image' ? '图片' : '视频'}模型</span>
@@ -359,11 +367,15 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
         </div>
 
         {/* Modal Main Content */}
-        <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50 dark:bg-slate-950/40 space-y-4">
+        <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50 space-y-4">
           {/* Models Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {(activeTab === 'image' ? localConfig.imageModels : localConfig.videoModels).map(
-              (model: ModelMetadata) => {
+            {(activeTab === 'text'
+              ? (localConfig.textModels || [])
+              : activeTab === 'image'
+              ? localConfig.imageModels
+              : localConfig.videoModels
+            ).map((model: ModelMetadata) => {
                 const testResult = testResults[model.id];
                 const isTesting = testingModelId === model.id;
                 const isKeyShown = Boolean(showKeyMap[model.id]);
@@ -371,35 +383,35 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                 return (
                   <div
                     key={model.id}
-                    className={`p-4 rounded-xl border transition-all flex flex-col justify-between relative ${
+                    className={`p-4 rounded-xl border transition-all flex flex-col justify-between relative shadow-2xs ${
                       model.enabled
-                        ? 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 shadow-surface-sm hover:border-emerald-400/80'
-                        : 'bg-slate-100/80 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-60'
+                        ? 'bg-white border-slate-200/80 text-slate-900'
+                        : 'bg-slate-100/60 border-slate-200/60 text-slate-400 opacity-70'
                     }`}
                   >
                     <div>
-                      {/* Top bar: Title, Badges & Enable/Edit/Delete Controls */}
+                      {/* Top bar */}
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                            <h4 className="font-bold text-sm text-slate-900">
                               {model.name}
                             </h4>
                             {model.isDefault && (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/60">
                                 默认模型
                               </span>
                             )}
                             {model.badge && !model.isDefault && (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                                 {model.badge}
                               </span>
                             )}
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-500">
                               {model.provider || 'AI Provider'}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                          <p className="text-xs text-slate-500 mt-1 line-clamp-2">
                             {model.description}
                           </p>
                         </div>
@@ -410,14 +422,14 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                             <>
                               <button
                                 onClick={() => handleOpenEditForm(model, activeTab)}
-                                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                                 title="编辑模型配置"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteModel(model.id, activeTab)}
-                                className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                                 title="删除模型"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -432,11 +444,11 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                                 ? handleToggleEnableImage(model.id as any)
                                 : handleToggleEnableVideo(model.id as any)
                             }
-                            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                            className={`px-2.5 py-1 rounded-lg text-xs font-semibold shadow-2xs transition-colors ${
                               model.enabled
-                                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-100'
-                                : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700'
-                            } ${userRole !== 'admin' ? 'cursor-not-allowed opacity-80' : ''}`}
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-slate-200 text-slate-500'
+                            } ${userRole !== 'admin' ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}
                           >
                             {model.enabled ? '已启用' : '已停用'}
                           </button>
@@ -444,24 +456,24 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                       </div>
 
                       {/* Endpoint & Key Display Box */}
-                      <div className="mt-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 space-y-1.5 text-xs">
-                        <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 font-mono text-[11px]">
-                          <span className="flex items-center gap-1">
+                      <div className="mt-3 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 space-y-1.5 text-xs font-mono">
+                        <div className="flex items-center justify-between text-slate-600 text-[11px]">
+                          <span className="flex items-center gap-1 font-semibold">
                             <Globe className="w-3 h-3 text-slate-400" />
                             <span>Base URL:</span>
                           </span>
-                          <span className="truncate max-w-[220px] text-slate-800 dark:text-slate-200 font-semibold">
+                          <span className="truncate max-w-[220px] text-slate-900 font-medium">
                             {model.baseUrl || 'https://api.aigc.studio'}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between text-slate-600 dark:text-slate-400 font-mono text-[11px]">
-                          <span className="flex items-center gap-1">
+                        <div className="flex items-center justify-between text-slate-600 text-[11px]">
+                          <span className="flex items-center gap-1 font-semibold">
                             <Key className="w-3 h-3 text-slate-400" />
                             <span>API Key:</span>
                           </span>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-slate-800 dark:text-slate-200 font-semibold">
+                            <span className="text-slate-900 font-medium">
                               {isKeyShown
                                 ? model.apiKey || '未配置'
                                 : model.apiKey
@@ -472,7 +484,7 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                               <button
                                 type="button"
                                 onClick={() => toggleShowKey(model.id)}
-                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                className="text-slate-400 hover:text-slate-600 cursor-pointer"
                               >
                                 {isKeyShown ? (
                                   <EyeOff className="w-3 h-3" />
@@ -484,33 +496,33 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-800 text-[11px]">
-                          <span className="text-slate-500">推荐场景:</span>
-                          <span className="font-medium text-slate-800 dark:text-slate-200 text-right truncate max-w-[200px]">
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 text-[11px]">
+                          <span className="text-slate-500 font-semibold">推荐场景:</span>
+                          <span className="text-slate-600 text-right truncate max-w-[200px]">
                             {model.recommendedScenario}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Footer Actions: Test Connection & Set Default */}
-                    <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                    {/* Footer Actions */}
+                    <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleTestConnection(model)}
                           disabled={isTesting}
-                          className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1"
+                          className="px-2.5 py-1 rounded-lg text-xs font-medium bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 shadow-2xs transition-colors flex items-center gap-1 cursor-pointer"
                         >
-                          <Activity className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin text-emerald-500' : 'text-slate-500'}`} />
+                          <Activity className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin text-blue-600' : 'text-slate-400'}`} />
                           <span>{isTesting ? '检测中...' : '测试连接'}</span>
                         </button>
 
                         {testResult && (
                           <span
-                            className={`px-2 py-0.5 rounded text-[11px] font-semibold flex items-center gap-1 ${
+                            className={`px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 ${
                               testResult.success
-                                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
-                                : 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-rose-50 text-rose-700 border border-rose-200'
                             }`}
                           >
                             {testResult.message}
@@ -525,7 +537,7 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                               ? handleSetDefaultImage(model.id as any)
                               : handleSetDefaultVideo(model.id as any)
                           }
-                          className="text-[11px] text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium underline flex items-center gap-1"
+                          className="text-[11px] text-blue-600 hover:text-blue-700 font-medium underline flex items-center gap-1 cursor-pointer"
                         >
                           <Sliders className="w-3 h-3" />
                           <span>设为默认</span>
@@ -540,8 +552,8 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/90 flex items-center justify-between">
-          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between">
+          <div className="text-xs text-slate-500 flex items-center gap-1.5">
             <AlertCircle className="w-4 h-4 text-slate-400 shrink-0" />
             <span>所有模型变更已通过 REST API 架构进行状态同步与本地持久化</span>
           </div>
@@ -549,14 +561,14 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
+              className="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 bg-white border border-slate-200/80 shadow-2xs hover:bg-slate-100 transition-colors cursor-pointer"
             >
               关闭
             </button>
             {userRole === 'admin' && (
               <button
                 onClick={handleSave}
-                className="px-5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5"
+                className="px-5 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 {saveSuccess ? (
                   <>
@@ -574,16 +586,16 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
 
       {/* Add / Edit Model Dialog Modal */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Server className="w-4 h-4 text-emerald-600" />
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white text-slate-900 border border-slate-200/90 rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Server className="w-4 h-4 text-blue-600" />
                 <span>{editingModel ? '编辑 AI 模型配置' : `新增${formType === 'image' ? '图片' : '视频'} AI 模型`}</span>
               </h3>
               <button
                 onClick={() => setIsFormOpen(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -591,7 +603,7 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
 
             <form onSubmit={handleSaveForm} className="space-y-3 text-xs">
               <div>
-                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-700 mb-1">
                   模型展示名称 (Model Name) *
                 </label>
                 <input
@@ -600,19 +612,19 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="例如：Gemini 3.6 Ultra HD"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block font-semibold text-slate-700 mb-1">
                     AI 服务商 (Provider)
                   </label>
                   <select
                     value={formProvider}
                     onChange={(e) => setFormProvider(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs cursor-pointer"
                   >
                     <option value="Google Gemini AIGC">Google Gemini AIGC</option>
                     <option value="OpenAI Enterprise">OpenAI Enterprise</option>
@@ -625,7 +637,7 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block font-semibold text-slate-700 mb-1">
                     模型代码 (Model Code)
                   </label>
                   <input
@@ -633,13 +645,13 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                     value={formModelCode}
                     onChange={(e) => setFormModelCode(e.target.value)}
                     placeholder="例如：gemini-3.6-ultra"
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                    className="w-full bg-white border border-slate-200 rounded-lg p-2.5 font-mono text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-700 mb-1">
                   API Base URL (接口地址)
                 </label>
                 <input
@@ -648,12 +660,12 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                   value={formBaseUrl}
                   onChange={(e) => setFormBaseUrl(e.target.value)}
                   placeholder="https://generativelanguage.googleapis.com/v1beta"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 font-mono text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-700 mb-1">
                   API Key (密钥)
                 </label>
                 <input
@@ -661,12 +673,12 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                   value={formApiKey}
                   onChange={(e) => setFormApiKey(e.target.value)}
                   placeholder="sk-proj-..."
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 font-mono text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-700 mb-1">
                   推荐应用场景
                 </label>
                 <input
@@ -674,19 +686,19 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                   value={formScenario}
                   onChange={(e) => setFormScenario(e.target.value)}
                   placeholder="例如：适合爆款短视频 4K 质感极速重构"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block font-semibold text-slate-700 mb-1">
                     生成速度评级
                   </label>
                   <select
                     value={formSpeedRating}
                     onChange={(e) => setFormSpeedRating(e.target.value as any)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs cursor-pointer"
                   >
                     <option value="极快">极快</option>
                     <option value="快速">快速</option>
@@ -696,7 +708,7 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block font-semibold text-slate-700 mb-1">
                     预估生成耗时
                   </label>
                   <input
@@ -704,13 +716,13 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                     value={formSpeedMs}
                     onChange={(e) => setFormSpeedMs(e.target.value)}
                     placeholder="例如：2.5s"
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block font-semibold text-slate-700 mb-1">
                   模型描述
                 </label>
                 <textarea
@@ -718,21 +730,21 @@ export const ModelConfigCenterModal: React.FC<ModelConfigCenterModalProps> = ({
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
                   placeholder="模型核心能力与适用参数"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 shadow-2xs"
                 />
               </div>
 
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsFormOpen(false)}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="px-3.5 py-2 rounded-lg text-xs font-medium bg-white border border-slate-200/80 text-slate-700 hover:bg-slate-100 shadow-2xs cursor-pointer"
                 >
                   取消
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-2xs cursor-pointer"
                 >
                   保存模型配置
                 </button>

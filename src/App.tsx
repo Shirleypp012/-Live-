@@ -59,7 +59,7 @@ export default function App() {
 
   // Pipeline & Simulation States
   const [currentStep, setCurrentStep] = useState<StepId>(1);
-  const [useMockMode, setUseMockMode] = useState<boolean>(true);
+  const [useMockMode, setUseMockMode] = useState<boolean>(false);
   const [isAutoPipelineRunning, setIsAutoPipelineRunning] = useState<boolean>(false);
 
   // Products / Selling Points State
@@ -649,7 +649,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-emerald-500 selection:text-white transition-colors">
+    <div className="flex min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-indigo-600 selection:text-white transition-colors">
       {/* Resizable Sidebar */}
       <Sidebar
         sidebarWidth={sidebarWidth}
@@ -678,6 +678,7 @@ export default function App() {
 
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
           {/* VIEW ROUTING */}
+
 
           {/* 1. MATERIALS PAGE VIEW */}
           {activeView === 'materials' && (
@@ -747,18 +748,18 @@ export default function App() {
           {activeView === 'pipeline' && (
             <div className="space-y-6">
               {/* Active Selling Points Banner */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-slate-50 to-teal-50 border border-emerald-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-surface-sm">
+              <div className="p-4 rounded-2xl bg-white border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-700 border border-emerald-300/60 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
                     <PackageCheck className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold text-slate-500">流水线绑定卖点:</span>
-                      <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-lg border border-emerald-200">
+                      <span className="text-xs font-bold text-slate-500">工作台绑定卖点:</span>
+                      <span className="text-xs font-extrabold text-indigo-900 bg-indigo-50 px-2.5 py-0.5 rounded-lg border border-indigo-200">
                         {activeProduct.name}
                       </span>
-                      <span className="text-[10px] text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-md font-medium">
+                      <span className="text-[10px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md font-medium border border-slate-200/60">
                         {activeProduct.category}
                       </span>
                     </div>
@@ -772,7 +773,7 @@ export default function App() {
                   <select
                     value={activeProduct.id}
                     onChange={(e) => setActiveProductId(e.target.value)}
-                    className="px-3 py-1.5 rounded-xl bg-white text-slate-800 border border-slate-300 text-xs font-bold focus:outline-none cursor-pointer shadow-sm hover:border-emerald-400"
+                    className="px-3 py-1.5 rounded-xl bg-white text-slate-800 border border-slate-300 text-xs font-bold focus:outline-none cursor-pointer shadow-xs hover:border-indigo-400"
                   >
                     {products.map((p) => (
                       <option key={p.id} value={p.id} className="bg-white text-slate-900">
@@ -783,7 +784,7 @@ export default function App() {
 
                   <button
                     onClick={() => setActiveView('knowledge')}
-                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-sm shrink-0 flex items-center gap-1.5 shadow-emerald-600/20"
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-xs shrink-0 flex items-center gap-1.5"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>切换到卖点库页面</span>

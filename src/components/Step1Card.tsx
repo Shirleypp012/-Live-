@@ -30,6 +30,8 @@ import {
   FileVideo,
   FolderPlus,
   SlidersHorizontal,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { ModelConfigState } from '../data/models';
 import { PromptEditorModal } from './PromptEditorModal';
@@ -82,6 +84,7 @@ export const Step1Card: React.FC<Step1CardProps> = ({
 }) => {
   // Mode Switch State: 'single' | 'batch'
   const [executionMode, setExecutionMode] = useState<'single' | 'batch'>('single');
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   // Single Mode UI states
   const [copiedPrompt, setCopiedPrompt] = useState(false);
@@ -470,11 +473,17 @@ export const Step1Card: React.FC<Step1CardProps> = ({
   const editingQueueItem = batchQueue.find((q) => q.id === editingQueueItemId);
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-surface-md overflow-hidden transition-all">
+    <div
+      className={
+        isFullscreen
+          ? 'fixed inset-0 z-50 bg-white dark:bg-slate-900 overflow-y-auto p-6 md:p-8 flex flex-col shadow-2xl transition-all'
+          : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-surface-md overflow-hidden transition-all'
+      }
+    >
       {/* Top Header & Mode Toggle Bar */}
       <div className="px-6 py-4 bg-slate-50/80 dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold flex items-center justify-center shadow-surface-sm shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-slate-900 text-white font-bold flex items-center justify-center shadow-xs shrink-0">
             1
           </div>
           <div>
@@ -482,14 +491,39 @@ export const Step1Card: React.FC<Step1CardProps> = ({
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
                 第 1 步：视频 / Live图 → 同款静态图提示词
               </h3>
-              <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-800 px-2.5 py-0.5 rounded-full">
+              <span className="text-[11px] font-bold text-indigo-900 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800 px-2.5 py-0.5 rounded-full">
                 AI 视觉拆解引擎
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              视觉深度理解 + 爆款结构化 Prompt 拆解（支持单素材精细拆解与多素材批量并发反推）
+              视觉深度理解 + 结构化 Prompt 拆解（支持单素材精细拆解与多素材批量反推）
             </p>
           </div>
+        </div>
+
+        {/* Header Right Actions & Fullscreen Toggle */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs ${
+              isFullscreen
+                ? 'bg-slate-900 text-white hover:bg-slate-800'
+                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+            }`}
+            title={isFullscreen ? '退出全屏沉浸模式' : '进入全屏沉浸模式操作'}
+          >
+            {isFullscreen ? (
+              <>
+                <Minimize2 className="w-3.5 h-3.5" />
+                <span>退出全屏</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-3.5 h-3.5 text-indigo-600" />
+                <span>全屏沉浸</span>
+              </>
+            )}
+          </button>
         </div>
 
         {/* Mode Switcher Tabs */}
@@ -502,7 +536,7 @@ export const Step1Card: React.FC<Step1CardProps> = ({
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-600" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
             <span>单素材精细拆解</span>
           </button>
 
@@ -510,7 +544,7 @@ export const Step1Card: React.FC<Step1CardProps> = ({
             onClick={() => setExecutionMode('batch')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all relative ${
               executionMode === 'batch'
-                ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
+                ? 'bg-slate-900 text-white shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
@@ -561,7 +595,7 @@ export const Step1Card: React.FC<Step1CardProps> = ({
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>运行 ▶</span>
+                  <span>运行 </span>
                 </>
               )}
             </button>
@@ -814,7 +848,7 @@ export const Step1Card: React.FC<Step1CardProps> = ({
                       <ImageIcon className="w-6 h-6" />
                     </div>
                     <p className="text-xs text-slate-300 font-medium">
-                      点击【运行 ▶】启动第 1 步视觉拆解流水线
+                      点击【启动拆解】开始第 1 步视觉拆解与生成
                     </p>
                     <p className="text-[11px] text-slate-500 mt-1">
                       （系统将自动提取画面色板、镜头构图、情绪与 Midjourney/Imagen 提示词）
@@ -1010,14 +1044,6 @@ export const Step1Card: React.FC<Step1CardProps> = ({
                     <span>从素材库批量导入 ({materials.length})</span>
                   </button>
                 )}
-
-                <button
-                  onClick={handleAddDemoPackage}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold hover:bg-emerald-100 flex items-center gap-1.5 shadow-sm"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>一键载入 4 个爆款示例素材包</span>
-                </button>
               </div>
             </div>
 
@@ -1032,7 +1058,7 @@ export const Step1Card: React.FC<Step1CardProps> = ({
                     </span>
                   </div>
                   <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono border border-emerald-500/30">
-                    并发线程数: 8 (Promise.all 同步处理)
+                    AI 8 线程极速并发处理
                   </span>
                 </div>
 
@@ -1087,7 +1113,7 @@ export const Step1Card: React.FC<Step1CardProps> = ({
                   ) : (
                     <>
                       <Zap className="w-4 h-4 fill-current text-slate-950" />
-                      <span>⚡ 一键全量并发拆解 ({pendingTasks}个等待中)</span>
+                      <span> 一键全量并发拆解 ({pendingTasks}个等待中)</span>
                     </>
                   )}
                 </button>

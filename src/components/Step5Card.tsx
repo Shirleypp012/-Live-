@@ -19,7 +19,11 @@ import {
   Sliders,
   Volume2,
   RefreshCw,
+  Maximize2,
+  Minimize2,
+  Scissors,
 } from 'lucide-react';
+import { ArtificialVideoEditor } from './ArtificialVideoEditor';
 
 interface Step5CardProps {
   inputs: Step5Inputs;
@@ -55,6 +59,8 @@ export const Step5Card: React.FC<Step5CardProps> = ({
   const [copiedFFmpeg, setCopiedFFmpeg] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
   const [activeTab, setActiveTab] = useState<'visual' | 'timeline' | 'json'>('visual');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isArtificialEditorOpen, setIsArtificialEditorOpen] = useState(false);
 
   const isRunning = status === 'running';
   const isCompleted = status === 'completed' && Boolean(output);
@@ -111,7 +117,22 @@ export const Step5Card: React.FC<Step5CardProps> = ({
   })?.text;
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-surface-md overflow-hidden transition-all">
+    <div
+      className={
+        isFullscreen
+          ? 'fixed inset-0 z-50 bg-white dark:bg-slate-900 overflow-y-auto p-6 md:p-8 flex flex-col shadow-2xl transition-all'
+          : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-surface-md overflow-hidden transition-all'
+      }
+    >
+      {/* Artificial Video Editor Fullscreen Overlay */}
+      {isArtificialEditorOpen && (
+        <ArtificialVideoEditor
+          initialTitle={inputs.copywritingTitle || '高奢小绿泥晨间洗漱视频成片'}
+          initialBgmTrack={inputs.bgmName || 'Chill Lofi Beats'}
+          onClose={() => setIsArtificialEditorOpen(false)}
+        />
+      )}
+
       {/* Header */}
       <div className="px-6 py-4 bg-slate-50/80 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -120,15 +141,46 @@ export const Step5Card: React.FC<Step5CardProps> = ({
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              第 5 步：视频 + 文案 + BGM → 合成输出成品
+              第 5 步：视频 + 文案 + BGM → 合成输出成品 & 二次精细剪辑
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              全流水线产物聚合 + 时间轴控制 + FFmpeg 渲染指令与成片质检清单
+              全流水线产物聚合 + 时间轴控制 + FFmpeg 渲染指令 + 支持人工二次微调剪辑
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Artificial Video Editor Launch Button */}
+          <button
+            onClick={() => setIsArtificialEditorOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-md shadow-indigo-500/20"
+            title="打开人工剪辑工作台 (字体、BGM、音效等)"
+          >
+            <Scissors className="w-3.5 h-3.5" />
+            <span>人工二次剪辑</span>
+          </button>
+
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-surface-sm ${
+              isFullscreen
+                ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+            }`}
+            title={isFullscreen ? '退出全屏沉浸模式' : '进入全屏沉浸模式操作'}
+          >
+            {isFullscreen ? (
+              <>
+                <Minimize2 className="w-3.5 h-3.5" />
+                <span>退出全屏</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>全屏沉浸</span>
+              </>
+            )}
+          </button>
           <button
             onClick={onPrev}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-surface-sm"
@@ -178,7 +230,7 @@ export const Step5Card: React.FC<Step5CardProps> = ({
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 fill-current" />
-                <span>运行 ▶</span>
+                <span>运行 </span>
               </>
             )}
           </button>
